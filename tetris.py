@@ -356,8 +356,11 @@ class Tetris(object):
                     hold_used = 0
                 i = 0
                 while i < 20:
-
-                    for f in range(10):  # actualisation
+                    total_time_spent = 0
+                    frequency = 0
+                    # for f in range(10):  # actualisation
+                    while total_time_spent < time_step: # actualisation
+                        start = time.time()
                         self.socket_.send(GET)
                         self.action = int(self.socket_.recv(256))
 
@@ -397,7 +400,19 @@ class Tetris(object):
                         #  update hud
                         self.clean_hud()
                         self.set_hud()
-                        time.sleep(time_step / 10)
+
+                        time_spent = time.time()-start
+                        refresh_step_time = time_step / 60
+                        if time_spent < refresh_step_time:
+                            sleep_time = (refresh_step_time)-time_spent
+                            time.sleep(sleep_time)
+                            total_time_spent += refresh_step_time
+                        else:
+                            total_time_spent += time_spent
+                        frequency += 1
+
+                    print frequency
+
                     if active_tetrimino == "":
                         break
 
@@ -476,7 +491,7 @@ class Tetris(object):
                 if next_level >= 10:
                     next_level -= 10
                     self.level += 1
-                    time_step = time_step * 0.5
+                    time_step = time_step * 0.75
 
                 #  update hud
                 self.clean_hud()
