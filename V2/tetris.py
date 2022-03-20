@@ -1,11 +1,13 @@
-import maya.cmds as cmds
 import math
-import time
-import random
-import subprocess
-import socket
 import os
-from tetrisGlobals import *
+import random
+import socket
+import subprocess
+import time
+
+import maya.cmds as cmds
+from constants import *
+
 
 class Tetris(object):
     def __init__(self):
@@ -22,7 +24,7 @@ class Tetris(object):
         self.socket_ = None
 
     def clean_game(self):
-        to_del = ['grilleTetrisGrp', '*TetriminoEnv', '*Txgrp', 'tetrisCam', 'tetrimino*grp']
+        to_del = ["grilleTetrisGrp", "*TetriminoEnv", "*Txgrp", "tetrisCam", "tetrimino*grp"]
         for item in to_del:
             if cmds.ls(item):
                 cmds.delete(item)
@@ -34,25 +36,49 @@ class Tetris(object):
 
     def set_hud(self):
         # hud score
-        cmds.headsUpDisplay('tetrisScoreHUD', section=0, block=11, blockSize="small",
-                            label="Score : {0}".format(self.score), command="pass",
-                            labelFontSize="large", dataFontSize="large", attachToRefresh=1)
+        cmds.headsUpDisplay(
+            "tetrisScoreHUD",
+            section=0,
+            block=11,
+            blockSize="small",
+            label="Score : {0}".format(self.score),
+            command="pass",
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=1,
+        )
 
         # hud level
-        cmds.headsUpDisplay('tetrisLevelHUD', section=0, block=12, blockSize="small",
-                            label="Level : {0}".format(self.level), command="pass",
-                            labelFontSize="large", dataFontSize="large", attachToRefresh=1)
+        cmds.headsUpDisplay(
+            "tetrisLevelHUD",
+            section=0,
+            block=12,
+            blockSize="small",
+            label="Level : {0}".format(self.level),
+            command="pass",
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=1,
+        )
 
         # hud lines
-        cmds.headsUpDisplay('tetrisLinesHUD', section=0, block=13, blockSize="small",
-                            label="Lines : {0}".format(self.lines), command="pass",
-                            labelFontSize="large", dataFontSize="large", attachToRefresh=1)
+        cmds.headsUpDisplay(
+            "tetrisLinesHUD",
+            section=0,
+            block=13,
+            blockSize="small",
+            label="Lines : {0}".format(self.lines),
+            command="pass",
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=1,
+        )
 
     @staticmethod
     def clean_hud():
-        cmds.headsUpDisplay('tetrisScoreHUD', rem=1)
-        cmds.headsUpDisplay('tetrisLevelHUD', rem=1)
-        cmds.headsUpDisplay('tetrisLinesHUD', rem=1)
+        cmds.headsUpDisplay("tetrisScoreHUD", rem=1)
+        cmds.headsUpDisplay("tetrisLevelHUD", rem=1)
+        cmds.headsUpDisplay("tetrisLinesHUD", rem=1)
 
     def viewport_ui(self):
         # game environnement
@@ -62,17 +88,17 @@ class Tetris(object):
             for y in range(20):
                 name_cube = "GrilleTetris{0}{1}Env".format(x, y)
                 cmds.polyCube(w=1, h=1, d=1, sx=1, sy=1, sz=1, cuv=0, ch=0, n=name_cube)
-                cmds.polyBevel3('{0}.e[0:11]'.format(name_cube), segments=1, ch=0, o=0.05, oaf=0, ws=1, at=30)
+                cmds.polyBevel3("{0}.e[0:11]".format(name_cube), segments=1, ch=0, o=0.05, oaf=0, ws=1, at=30)
                 cmds.move(x - 4, y, -1, name_cube, absolute=1)
-                cmds.parent(name_cube, 'grilleTetrisGrp')
+                cmds.parent(name_cube, "grilleTetrisGrp")
 
         cmds.polyTorus(r=3.2, sr=0.3, tw=0, sx=4, sy=3, cuv=0, ch=0, n="futureTetriminoEnv")
         cmds.move(8.5, 15, -1, "futureTetriminoEnv", absolute=1)
-        cmds.rotate('90deg', 0, '-45deg', "futureTetriminoEnv", a=1)
+        cmds.rotate("90deg", 0, "-45deg", "futureTetriminoEnv", a=1)
 
         cmds.polyTorus(r=3.2, sr=0.3, tw=0, sx=4, sy=3, cuv=0, ch=0, n="holdTetriminoEnv")
         cmds.move(-7.5, 15, -1, "holdTetriminoEnv", absolute=1)
-        cmds.rotate('90deg', 0, '-45deg', "holdTetriminoEnv", a=1)
+        cmds.rotate("90deg", 0, "-45deg", "holdTetriminoEnv", a=1)
 
         # texte environnement
         ls_text = ["Next", "Hold"]
@@ -80,23 +106,24 @@ class Tetris(object):
             grp_name = cmds.group(name="{0}Txgrp".format(text), empty=1)
             crv_tx = cmds.textCurves(t=text)
             for letter in text:
-                letter_srf = cmds.planarSrf('Char_{0}_1'.format(letter), name="Char_{0}_1_tetris".format(letter),
-                                            ch=0, tol=0.01, o=1, po=0)[0]
+                letter_srf = cmds.planarSrf(
+                    "Char_{0}_1".format(letter), name="Char_{0}_1_tetris".format(letter), ch=0, tol=0.01, o=1, po=0
+                )[0]
                 cmds.parent(letter_srf, grp_name)
             cmds.delete(crv_tx)
 
         cmds.move(7.2, 18, 0, "NextTxgrp", absolute=1)
         cmds.move(-8.7, 18, 0, "HoldTxgrp", absolute=1)
 
-        cmds.modelEditor('modelPanel4', e=1, hud=1, gr=0, ha=0, sdw=0)  # hud on - grid off - handles off
+        cmds.modelEditor("modelPanel4", e=1, hud=1, gr=0, ha=0, sdw=0)  # hud on - grid off - handles off
 
         # camera
         tetris_cam = cmds.camera(position=[1.231, 9.496, 404], fl=300, ncp=10)
         cmds.rename(tetris_cam[0], "tetris_cam")
         cmds.lookThru("tetris_cam")
-        ls_attr = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']
+        ls_attr = ["tx", "ty", "tz", "rx", "ry", "rz"]
         for attr in ls_attr:
-            cmds.setAttr('tetris_cam.{0}'.format(attr), lock=True)
+            cmds.setAttr("tetris_cam.{0}".format(attr), lock=True)
 
         # desactivation hud
         self.lsHUD = cmds.headsUpDisplay(q=1, listHeadsUpDisplays=1)
@@ -112,7 +139,7 @@ class Tetris(object):
 
     def restore_ui(self):
         # restore viewport
-        cmds.modelEditor('modelPanel4', e=1, hud=1, gr=1, ha=1, sdw=0)
+        cmds.modelEditor("modelPanel4", e=1, hud=1, gr=1, ha=1, sdw=0)
 
         self.clean_hud()
 
@@ -133,9 +160,19 @@ class Tetris(object):
         i = 0
         while i < 4:
             pos = part_pos[i]
-            name_part = cmds.polyCube(w=1, h=1, d=1, sx=1, sy=1, sz=1, ax=[0, 1, 0], ch=0, cuv=0,
-                                      n="tetrimino{1}{0}part1".format(id_t, part_pos[4]))
-            cmds.polyBevel3('{0}.e[0:11]'.format(name_part[0]), segments=1, ch=0, o=0.1, oaf=0, ws=1, at=30)
+            name_part = cmds.polyCube(
+                w=1,
+                h=1,
+                d=1,
+                sx=1,
+                sy=1,
+                sz=1,
+                ax=[0, 1, 0],
+                ch=0,
+                cuv=0,
+                n="tetrimino{1}{0}part1".format(id_t, part_pos[4]),
+            )
+            cmds.polyBevel3("{0}.e[0:11]".format(name_part[0]), segments=1, ch=0, o=0.1, oaf=0, ws=1, at=30)
             cmds.polyColorPerVertex(rgb=(part_pos[5][0], part_pos[5][1], part_pos[5][2]), cdo=1, nun=1)
             cmds.move(pos[0], pos[1], 0, name_part, absolute=1)
             part_ls.append(name_part[0])
@@ -151,8 +188,10 @@ class Tetris(object):
         for part in active_part:
             pos_part = cmds.xform(part, ws=1, q=1, t=1)
             # teste si la place dans la direction du deplacement est occupe
-            if (pos_part[channel] == condition[0] or
-                    self.matrix_pos[int(pos_part[1]) + condition[1]][int(pos_part[0] + condition[2])] == 1):
+            if (
+                pos_part[channel] == condition[0]
+                or self.matrix_pos[int(pos_part[1]) + condition[1]][int(pos_part[0] + condition[2])] == 1
+            ):
                 limit = 1
                 break
         if limit == 0:
@@ -195,8 +234,11 @@ class Tetris(object):
         for i in range(3):
             new_pos = []
             for pos in pos_part:
-                result_rot = self.rotate([origin_pos[0] + offset[0], origin_pos[1] + offset[1]],
-                                         [pos[0] + offset[0], pos[1] + offset[1]], math.radians(-90))
+                result_rot = self.rotate(
+                    [origin_pos[0] + offset[0], origin_pos[1] + offset[1]],
+                    [pos[0] + offset[0], pos[1] + offset[1]],
+                    math.radians(-90),
+                )
                 new_pos.append(result_rot)
                 side_l_r = result_rot[0] - (origin_pos[0] + offset[0])
                 side_u_d = result_rot[1] - (origin_pos[1] + offset[1])
@@ -244,7 +286,7 @@ class Tetris(object):
             cmds.move(-7.85, 15.4, 0, hold_tetrimino, absolute=1)
         else:
             cmds.move(-7.5, 15.25, 0, hold_tetrimino, absolute=1)
-        cmds.scale(.85, .85, .85, hold_tetrimino, a=1)
+        cmds.scale(0.85, 0.85, 0.85, hold_tetrimino, a=1)
 
     def hold_tetris(self, active_tetrimino, active_part, pos_part):
         for i in range(4):
@@ -275,17 +317,24 @@ class Tetris(object):
 
         # Info construction Tetrimino (position, nom, couleur)
         tetrimino_t = [[0, 0, 0], [1, 0, 0], [-1, 0, 0], [0, -1, 0], "T", [0.23, 0.0, 0.27]]
-        tetrimino_o = [[0, 0, 0], [0, -1, 0], [1, 0, 0], [1, -1, 0], "O", [.7, .65, .02]]
+        tetrimino_o = [[0, 0, 0], [0, -1, 0], [1, 0, 0], [1, -1, 0], "O", [0.7, 0.65, 0.02]]
         tetrimino_l = [[0, 0, 0], [-1, -1, 0], [1, 0, 0], [-1, 0, 0], "L", [0.75, 0.25, 0]]
         tetrimino_j = [[0, 0, 0], [1, -1, 0], [1, 0, 0], [-1, 0, 0], "J", [0.02, 0.02, 0.65]]
-        tetrimino_z = [[0, 0, 0], [0, -1, 0], [-1, 0, 0], [1, -1, 0], "Z", [.65, 0.02, 0.02]]
-        tetrimino_s = [[0, 0, 0], [0, -1, 0], [1, 0, 0], [-1, -1, 0], "S", [0.02, .65, 0.02]]
-        tetrimino_i = [[0, 0, 0], [-1, 0, 0], [1, 0, 0], [2, 0, 0], "I", [0, .5, 1]]
+        tetrimino_z = [[0, 0, 0], [0, -1, 0], [-1, 0, 0], [1, -1, 0], "Z", [0.65, 0.02, 0.02]]
+        tetrimino_s = [[0, 0, 0], [0, -1, 0], [1, 0, 0], [-1, -1, 0], "S", [0.02, 0.65, 0.02]]
+        tetrimino_i = [[0, 0, 0], [-1, 0, 0], [1, 0, 0], [2, 0, 0], "I", [0, 0.5, 1]]
 
         ls_tetrimino = [tetrimino_t, tetrimino_o, tetrimino_l, tetrimino_j, tetrimino_z, tetrimino_s, tetrimino_i]
         ls_tetrimino_hold = [tetrimino_t, tetrimino_o, tetrimino_l, tetrimino_j, tetrimino_z, tetrimino_s, tetrimino_i]
-        ls_tetrimino_name = ['tetriminoT', 'tetriminoO', 'tetriminoL', 'tetriminoJ', 'tetriminoZ',
-                             'tetriminoS', 'tetriminoI']
+        ls_tetrimino_name = [
+            "tetriminoT",
+            "tetriminoO",
+            "tetriminoL",
+            "tetriminoJ",
+            "tetriminoZ",
+            "tetriminoS",
+            "tetriminoI",
+        ]
 
         # Matrice position
         nbr_cols = 10
@@ -311,7 +360,7 @@ class Tetris(object):
 
         # countdown
         for i in range(3):
-            cmds.headsUpMessage('Start in {0}'.format(3 - i), time=1)
+            cmds.headsUpMessage("Start in {0}".format(3 - i), time=1)
             time.sleep(1)
 
         cmds.refresh()
@@ -338,7 +387,7 @@ class Tetris(object):
                     cmds.move(8.125, 15.35, 0, future_tetrimino, absolute=1)
                 else:
                     cmds.move(8.5, 15.25, 0, future_tetrimino, absolute=1)
-                cmds.scale(.85, .85, .85, future_tetrimino, a=1)
+                cmds.scale(0.85, 0.85, 0.85, future_tetrimino, a=1)
 
                 # check si la place est deja occupe a la creation du tetrimino
                 limit = 0
@@ -348,7 +397,7 @@ class Tetris(object):
                         limit = 1
                         break
                 if limit == 1:
-                    print "game over"
+                    print("game over")
                     game_over = 1
                     break
 
@@ -359,7 +408,7 @@ class Tetris(object):
                     total_time_spent = 0
                     frequency = 0
                     # for f in range(10):  # actualisation
-                    while total_time_spent < time_step: # actualisation
+                    while total_time_spent < time_step:  # actualisation
                         start = time.time()
                         self.socket_.send(GET)
                         self.action = int(self.socket_.recv(256))
@@ -384,9 +433,11 @@ class Tetris(object):
                             self.rotate_tetris(active_tetrimino, active_part)
 
                         elif self.action == HOLD and hold_used == 0:  # hold
-                            active_tetrimino = self.hold_tetris(active_tetrimino, active_part,
-                                                                ls_tetrimino_hold[
-                                                                    ls_tetrimino_name.index(active_tetrimino[0:10])])
+                            active_tetrimino = self.hold_tetris(
+                                active_tetrimino,
+                                active_part,
+                                ls_tetrimino_hold[ls_tetrimino_name.index(active_tetrimino[0:10])],
+                            )
                             if active_tetrimino == "":
                                 active_part = []
                                 i = 0
@@ -401,17 +452,17 @@ class Tetris(object):
                         self.clean_hud()
                         self.set_hud()
 
-                        time_spent = time.time()-start
+                        time_spent = time.time() - start
                         refresh_step_time = time_step / 60
                         if time_spent < refresh_step_time:
-                            sleep_time = (refresh_step_time)-time_spent
+                            sleep_time = (refresh_step_time) - time_spent
                             time.sleep(sleep_time)
                             total_time_spent += refresh_step_time
                         else:
                             total_time_spent += time_spent
                         frequency += 1
 
-                    print frequency
+                    print(frequency)
 
                     if active_tetrimino == "":
                         break
@@ -501,7 +552,7 @@ class Tetris(object):
 
                 cmds.delete(future_tetrimino)
                 # supprime les groupes vides
-                ls_grp = cmds.ls('tetrimino*grp')
+                ls_grp = cmds.ls("tetrimino*grp")
                 for grp in ls_grp:
                     if cmds.listRelatives(grp, children=1) is None:
                         cmds.delete(grp)
@@ -510,9 +561,12 @@ class Tetris(object):
             increment += 7
 
         cmds.refresh()
-        cmds.confirmDialog(title="Score", button="Ok",
-                           message="Game Over\n\n Final Score: {0}\n Lines: "
-                                   "{1}\n Final Level: {2}".format(self.score, self.lines, self.level))
+        cmds.confirmDialog(
+            title="Score",
+            button="Ok",
+            message="Game Over\n\n Final Score: {0}\n Lines: "
+            "{1}\n Final Level: {2}".format(self.score, self.lines, self.level),
+        )
 
     # -------------Launch process-------------
     def launch_game_process(self):
@@ -528,7 +582,7 @@ class Tetris(object):
 
     @staticmethod
     def launch_keyboard_catcher():
-        print "Launch keyboard catcher"
+        print("Launch keyboard catcher")
         SW_MINIMIZE = 6
         info = subprocess.STARTUPINFO()
         info.dwFlags = subprocess.STARTF_USESHOWWINDOW
@@ -540,14 +594,14 @@ class Tetris(object):
         subprocess.Popen(command, startupinfo=info)
 
     def stop_keyboard_catcher(self):
-        print "Stop keyboard catcher"
+        print("Stop keyboard catcher")
         self.socket_.sendall(KILL)
 
     def connect_to_key(self):
-        print "Connect to keyboard catcher"
+        print("Connect to keyboard catcher")
         self.socket_ = socket.socket()
         try:
             self.socket_.connect((HOST, PORT))
-            print "Connection on {}".format(PORT)
+            print("Connection on {}".format(PORT))
         except socket.error:
-            print "Can't connect to keyboard catcher"
+            print("Can't connect to keyboard catcher")
