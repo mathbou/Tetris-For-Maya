@@ -251,20 +251,25 @@ class Game(QWidget):
 
         tetrimino_type = self.tetrimino_type_queue.pop(0)
         next_tetrimino = tetrimino_type.make(id=self._loop_counter)
-
         self.grid.put_to_next(next_tetrimino)
 
-        if self.inplace_collision(self.grid.active_tetrimino):
-            self.game_over()
-
-        self.loop_worker = LoopWorker(self.grid.ROW_COUNT, self.time_step)
-        self.loop_worker.step.connect(self.step)
-        self.loop_worker.moveToThread(self._thread)
-        self._thread.started.connect(self.loop_worker.run)
-        self.loop_worker.finished.connect(self.post_loop)
-        self.loop_worker.finished.connect(self.loop_worker.deleteLater)
-
         self._loop_counter += 1
+
+        if self._loop_counter <= 1:
+            self.init_loop()
+        elif self.grid.inplace_collision(self.grid.active_tetrimino):
+            self.game_over()
+        else:
+            self.loop_worker = LoopWorker(self.grid.ROW_COUNT, self.time_step)
+            self.loop_worker.step.connect(self.step)
+            self.loop_worker.moveToThread(self._thread)
+            self._thread.started.connect(self.loop_worker.run)
+
+            self.loop_worker.finished.connect(self.post_loop)
+            self.loop_worker.finished.connect(self.loop_worker.deleteLater)
+            self.loop_worker.finished.connect(self._thread.quit)
+
+            self._thread.start()
 
     @Slot()
     def step(self):
