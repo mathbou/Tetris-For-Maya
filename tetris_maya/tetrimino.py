@@ -86,7 +86,7 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
 
     mc.select(clear=True)
 
-    return Tetrimino(type=TetriminoType.name, root=group, cubes=cubes)
+    return Tetrimino(type=name, root=group, cubes=cubes)
 
 
 
