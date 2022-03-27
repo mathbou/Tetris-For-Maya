@@ -22,5 +22,3 @@ def hud_countdown(msg: str, sec: int = 3):
     for i in range(sec):
         mc.headsUpMessage("{}: {}".format(msg, sec - i), time=1)
         time.sleep(1)
-
-    mc.refresh()
