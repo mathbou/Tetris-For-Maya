@@ -1,0 +1,32 @@
+import math
+from typing import Tuple
+
+__all__ = ["rotate_point", "absmax"]
+
+
+def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, float] = (0,0)) -> Tuple[float, float]:
+    """2D rotation on XY plane
+
+    Args:
+        origin:
+        point:
+        angle: Radians
+
+    Warnings:
+        Returned values are rounded to the closest integer.
+
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+
+    return qx, qy
+
+
+def absmax(a: float, b: float) -> float:
+    if abs(a) > abs(b):
+        return a
+    else:
+        return b
