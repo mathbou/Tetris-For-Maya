@@ -190,8 +190,8 @@ class Game(QWidget):
         self.grid.move(self.grid.active_tetrimino, x, y)
 
     def update_tetrimino_queue(self):
-        types = TetriminoType.get_all()
-        new_queue = random.choices(types, k=len(types))
+        new_queue = TetriminoType.get_all().copy()
+        random.shuffle(new_queue)
 
         try:
             self.tetrimino_type_queue.extend(new_queue)
