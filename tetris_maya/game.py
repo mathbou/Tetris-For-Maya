@@ -3,6 +3,7 @@ import time
 from enum import IntEnum
 
 import maya.cmds as mc
+import maya.mel as mel
 from PySide2.QtCore import QObject, Signal, QEvent, Slot, QThread, Qt
 from PySide2.QtWidgets import QWidget
 
