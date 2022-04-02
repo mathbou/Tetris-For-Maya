@@ -20,7 +20,8 @@ class Action(IntEnum):
     RIGHT = Qt.Key.Key_Right
     SOFTD = Qt.Key.Key_Down
     HARDD = Qt.Key.Key_Space
-    ROTATE = Qt.Key.Key_Up
+    ROTATE_LEFT = Qt.Key.Key_Z
+    ROTATE_RIGHT = Qt.Key.Key_Up
     HOLD = Qt.Key.Key_C
 
 
@@ -195,7 +196,7 @@ class Game(QWidget):
 
     # ---------------------- Game Actions ----------------------
 
-    def move(self, value):
+    def move(self, value: Action):
         x, y = 0, 0
 
         if value == Action.LEFT:
@@ -206,9 +207,10 @@ class Game(QWidget):
             x, y = 0, -1
             self._score += 1
 
-        elif value == Action.ROTATE:
-            self.grid.rotate(self.grid.active_tetrimino)
-
+        elif value == Action.ROTATE_RIGHT:
+            self.grid.rotate(self.grid.active_tetrimino, angle=-90)
+        elif value == Action.ROTATE_LEFT:
+            self.grid.rotate(self.grid.active_tetrimino, angle=90)
         elif value == Action.HARDD:
             while self.grid.move(self.grid.active_tetrimino, 0, -1):
                 pass
