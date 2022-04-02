@@ -26,6 +26,17 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
 
 
 def absmax(a: float, b: float) -> float:
+    """Returns the absolute highest number.
+
+    Examples:
+
+        >>> absmax(-3, 2)
+        -3
+
+        >>> absmax(3, 2)
+        3
+
+    """
     if abs(a) > abs(b):
         return a
     else:
