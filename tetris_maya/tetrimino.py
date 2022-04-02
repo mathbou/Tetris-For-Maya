@@ -59,25 +59,30 @@ I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0
 def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]],
                     color: Tuple[float, float, float],
                     name: str) -> Tetrimino:
+
     tetrimino_cubes = []
 
-    for i, (tx, ty) in enumerate(cubes):
-        tetrimino_cube = mc.polyCube(
-            width=1, height=1, depth=1,
-            subdivisionsX=1, subdivisionsY=1, subdivisionsZ=1,
-            createUVs=False,
-            constructionHistory=False,
-            axis=(0, 1, 0),
-            name=f"{PREFIX}_tetrimino{name}{i}"
-        )[0]
-        mc.polyBevel3(f"{tetrimino_cube}.e[0:11]", segments=1,
-                      constructionHistory=False, offset=0.1, offsetAsFraction=False,
-                      worldSpace=True,
-                      angleTolerance=30)
-        mc.polyColorPerVertex(rgb=color, colorDisplayOption=True, notUndoable=True)
+    tetrimino_cube = mc.polyCube(
+        width=1, height=1, depth=1,
+        subdivisionsX=1, subdivisionsY=1, subdivisionsZ=1,
+        createUVs=False,
+        constructionHistory=False,
+        axis=(0, 1, 0),
+        name=f"{PREFIX}_tetrimino{name}0"
+    )[0]
+    mc.polyBevel3(f"{tetrimino_cube}.e[0:11]", segments=1,
+                  constructionHistory=False, offset=0.1, offsetAsFraction=False,
+                  worldSpace=True,
+                  angleTolerance=30)
+    mc.polyColorPerVertex(rgb=color, colorDisplayOption=True, notUndoable=True)
+    mc.move(*cubes[0], 0, tetrimino_cube, absolute=True)
 
-        mc.move(tx, ty, 0, tetrimino_cube, absolute=True)
-        tetrimino_cubes.append(tetrimino_cube)
+    tetrimino_cubes.append(tetrimino_cube)
+
+    for tx, ty in cubes[1:]:
+        duplicate_cube = mc.duplicate(tetrimino_cube, instanceLeaf=True)[0]
+        mc.move(tx, ty, 0, duplicate_cube, absolute=True)
+        tetrimino_cubes.append(duplicate_cube)
 
     group = mc.group(tetrimino_cubes, name=f"{PREFIX}_tetrimino{name}_grp")
     mc.xform(group, pivots=(0, 0, 0), worldSpace=True)
