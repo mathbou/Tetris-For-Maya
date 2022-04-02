@@ -12,9 +12,6 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
         point:
         angle: Radians
 
-    Warnings:
-        Returned values are rounded to the closest integer.
-
     """
     ox, oy = origin
     px, py = point

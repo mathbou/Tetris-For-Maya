@@ -144,7 +144,7 @@ class Grid():
         offset_x, offset_y = 0, 0
 
         for cx, cy in tetrimino.cube_positions:
-            rx, ry = map(int, rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y)))
+            rx, ry = map(round, rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y)))
 
             if self.cell_occupied(rx, ry, tetrimino.cubes):
                 return False

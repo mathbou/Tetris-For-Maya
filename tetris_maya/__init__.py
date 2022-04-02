@@ -6,5 +6,4 @@ def launch_game():
     Game.start()
 
 
-# TODO bug de rotation quand collé a gauche
 # TODO bug de rotation quand collé en haut
