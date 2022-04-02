@@ -147,26 +147,26 @@ class Grid():
         origin_x, origin_y = tetrimino.position
         new_cube_pos: List[Tuple[int, int]] = []
 
-        offset_x, offset_y = 0, 0
+        global_offset_x, global_offset_y = 0, 0
 
         # ------ COMPUTE ------
         for cx, cy in tetrimino.cube_positions:
             rx, ry = map(round, rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y)))
 
             if not self.inside_grid(rx, ry):
-                item_ox = max(0, min(rx, self.RIGHT)) - rx
-                offset_x = absmax(item_ox, offset_x)
+                item_offset_x = max(self.LEFT, min(rx, self.RIGHT)) - rx
+                global_offset_x = absmax(item_offset_x, global_offset_x)
 
-                item_oy = max(0, min(ry, self.TOP)) - ry
-                offset_y = absmax(item_oy, offset_y)
+                item_offset_y = max(self.BOTTOM, min(ry, self.TOP)) - ry
+                global_offset_y = absmax(item_offset_y, global_offset_y)
 
             new_cube_pos.append((rx, ry))
 
         # ------ CHECK ------
-        if not self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=offset_x, offset_y=offset_y):
+        if not self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=global_offset_x, offset_y=global_offset_y):
             for ox in (-1, 1, -2, 2): # check if left or right move is possible
-                if self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=offset_x + ox, offset_y=offset_y):
-                    offset_x += ox
+                if self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=global_offset_x + ox, offset_y=global_offset_y):
+                    global_offset_x += ox
                     break
             else:
                 return False
@@ -175,7 +175,7 @@ class Grid():
         for cube, (x, y) in zip(tetrimino.cubes, new_cube_pos):
             mc.move(x, y, 0, cube, worldSpace=True, absolute=True)
 
-        mc.move(offset_x, offset_y, 0, tetrimino.root, relative=True)
+        mc.move(global_offset_x, global_offset_y, 0, tetrimino.root, relative=True)
         mc.refresh()
 
         return True
