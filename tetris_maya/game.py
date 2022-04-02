@@ -104,13 +104,13 @@ class Game(QWidget):
     LINES_HUD = f"{PREFIX}_lines_hud"
 
     def _prepare_hud(self):
-        # disable current hud
-        self._hud_backup = {hud_name: False for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)}
+        self._hud_backup = {hud_name: mc.headsUpDisplay(hud_name, query=True, visible=True) for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)}
 
-        for hud in list(self._hud_backup):
-            if mc.headsUpDisplay(hud, query=True, visible=True) is True:
+        # disable current hud
+        for hud, visible in self._hud_backup.items():
+            if visible:
                 mc.headsUpDisplay(hud, edit=True, visible=False)
-                self._hud_backup[hud] = True
+
 
         # hud score
         mc.headsUpDisplay(
@@ -151,16 +151,26 @@ class Game(QWidget):
             attachToRefresh=True,
         )
 
-    def prepare_viewport(self):
+    def _create_game_camera(self) -> str:
         camera, _ = mc.camera(focalLength=300, nearClipPlane=10,
-                           name=f"{PREFIX}_cam")
+                              name=f"{PREFIX}_cam")
         mc.lookThru(camera)
         mc.viewFit(camera)
         for attr in ["translate", "rotate"]:
             mc.setAttr(f"{camera}.{attr}", lock=True)
 
-        mc.modelEditor("modelPanel4", edit=True, hud=True,
-                       grid=False, handles=False, shadows=False)  # hud on - grid off - handles off
+        return camera
+
+    def prepare_viewport(self):
+        mel.eval('setNamedPanelLayout("Single Perspective View")')
+
+        self._create_game_camera()
+
+        self._panel_backup = {}
+        for attr in ("hud", "grid", "handles"):
+            self._panel_backup[attr] = mc.modelEditor("modelPanel4", query=True, **{attr: True})
+
+        mc.modelEditor("modelPanel4", edit=True, hud=True, grid=False, handles=False)
 
         self._prepare_hud()
 
@@ -173,7 +183,8 @@ class Game(QWidget):
             mc.headsUpDisplay(hud, edit=True, visible=state)
 
     def restore_viewport(self):
-        mc.modelEditor("modelPanel4", edit=True, hud=True, grid=True, handles=True, shadows=True)
+        for attr, value in self._panel_backup.items():
+            mc.modelEditor("modelPanel4", edit=True, **{attr: value})
 
         self._restore_hud()
 
