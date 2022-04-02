@@ -7,7 +7,7 @@ from PySide2.QtCore import QObject, Signal, QEvent, Slot, QThread, Qt
 from PySide2.QtWidgets import QWidget
 
 from .time2 import timer_precision
-from .constants import PREFIX, TIME_STEP, SCORE_TABLE
+from .constants import PREFIX, TIME_STEP, SCORE_TABLE, SCORE_HUD_NAME, LEVEL_HUD_NAME, LINES_HUD_NAME
 from .grid import Grid, Hold
 from .maya2 import hud_countdown, get_main_window
 from .tetrimino import TetriminoType
@@ -70,6 +70,7 @@ class LoopWorker(QObject):
     def cancel(self):
         self._is_canceled = True
 
+
 class Game(QWidget):
     def __init__(self):
         self._score = 0
@@ -99,10 +100,6 @@ class Game(QWidget):
     def clean_geo():
         mc.delete(f"{PREFIX}_*")
 
-    SCORE_HUD = f"{PREFIX}_score_hud"
-    LEVEL_HUD = f"{PREFIX}_level_hud"
-    LINES_HUD = f"{PREFIX}_lines_hud"
-
     def _prepare_hud(self):
         self._hud_backup = {hud_name: mc.headsUpDisplay(hud_name, query=True, visible=True) for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)}
 
@@ -114,7 +111,7 @@ class Game(QWidget):
 
         # hud score
         mc.headsUpDisplay(
-            self.SCORE_HUD,
+            SCORE_HUD_NAME,
             section=0,
             block=11,
             blockSize="small",
@@ -127,7 +124,7 @@ class Game(QWidget):
 
         # hud level
         mc.headsUpDisplay(
-            self.LEVEL_HUD,
+            LEVEL_HUD_NAME,
             section=0,
             block=12,
             blockSize="small",
@@ -140,7 +137,7 @@ class Game(QWidget):
 
         # hud lines
         mc.headsUpDisplay(
-            self.LINES_HUD,
+            LINES_HUD_NAME,
             section=0,
             block=13,
             blockSize="small",
@@ -175,9 +172,9 @@ class Game(QWidget):
         self._prepare_hud()
 
     def _restore_hud(self):
-        mc.headsUpDisplay(self.SCORE_HUD, remove=True)
-        mc.headsUpDisplay(self.LEVEL_HUD, remove=True)
-        mc.headsUpDisplay(self.LINES_HUD, remove=True)
+        mc.headsUpDisplay(SCORE_HUD_NAME, remove=True)
+        mc.headsUpDisplay(LEVEL_HUD_NAME, remove=True)
+        mc.headsUpDisplay(LINES_HUD_NAME, remove=True)
 
         for hud, state in self._hud_backup.items():
             mc.headsUpDisplay(hud, edit=True, visible=state)
