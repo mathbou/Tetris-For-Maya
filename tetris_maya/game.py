@@ -27,6 +27,12 @@ class Action(IntEnum):
 
 
 class LoopWorker(QObject):
+    """The game 'clock'. It sends a signal when the tetrimino should move down.
+
+    Warnings:
+        It must run in a separate thread, otherwise it blocks the main thread and the keyboard catcher won't work.
+
+    """
     step = Signal()
     finished = Signal()
     canceled = Signal()
@@ -320,6 +326,7 @@ class Game(QWidget):
         self._loop_counter += 1
 
         if self._loop_counter <= 1:
+            # Force a second init on the first turn
             self.init_loop()
         elif self.grid.inplace_collision(self.grid.active_tetrimino):
             self.game_over()
@@ -328,11 +335,13 @@ class Game(QWidget):
 
     @Slot()
     def step(self):
+        """Try to move down the current tetrimino. Stop the loop worker if it can't."""
         if not self.grid.move(self.grid.active_tetrimino, 0, -1):
             self.stop_loop_worker()
 
     @Slot()
     def post_loop(self):
+        """Update the grid and the score, then launch the next loop."""
         self.grid.reset_hold()
         self.grid.update_cells(self.grid.active_tetrimino)
 
@@ -346,6 +355,7 @@ class Game(QWidget):
         self.init_loop()
 
     def post_hold(self, value: Hold):
+        """Depending on the hold type, relaunch a worker (swap) or the full loop (push)."""
         if value is Hold.SWAP:
             self.launch_loop_worker()
         elif value is Hold.PUSH:
