@@ -4,7 +4,7 @@ from typing import Tuple
 __all__ = ["rotate_point", "absmax"]
 
 
-def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, float] = (0,0)) -> Tuple[float, float]:
+def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, float] = (0, 0)) -> Tuple[float, float]:
     """2D rotation on XY plane
 
     Args:
@@ -23,10 +23,9 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
 
 
 def absmax(a: float, b: float) -> float:
-    """Returns the absolute highest number.
+    """Get the absolute highest number.
 
     Examples:
-
         >>> absmax(-3, 2)
         -3
 

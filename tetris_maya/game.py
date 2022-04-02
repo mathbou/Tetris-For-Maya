@@ -4,14 +4,14 @@ from enum import IntEnum
 
 import maya.cmds as mc
 import maya.mel as mel
-from PySide2.QtCore import QObject, Signal, QEvent, Slot, QThread, Qt
+from PySide2.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
 from PySide2.QtWidgets import QWidget
 
-from .time2 import timer_precision
-from .constants import PREFIX, TIME_STEP, SCORE_TABLE, SCORE_HUD_NAME, LEVEL_HUD_NAME, LINES_HUD_NAME
+from .constants import LEVEL_HUD_NAME, LINES_HUD_NAME, PREFIX, SCORE_HUD_NAME, SCORE_TABLE, TIME_STEP
 from .grid import Grid, Hold
-from .maya2 import hud_countdown, get_main_window
+from .maya2 import get_main_window, hud_countdown
 from .tetrimino import TetriminoType
+from .time2 import timer_precision
 
 __all__ = ["Game"]
 
@@ -33,6 +33,7 @@ class LoopWorker(QObject):
         It must run in a separate thread, otherwise it blocks the main thread and the keyboard catcher won't work.
 
     """
+
     step = Signal()
     finished = Signal()
     canceled = Signal()
@@ -109,13 +110,15 @@ class Game(QWidget):
         mc.delete(f"{PREFIX}_*")
 
     def _prepare_hud(self):
-        self._hud_backup = {hud_name: mc.headsUpDisplay(hud_name, query=True, visible=True) for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)}
+        self._hud_backup = {
+            hud_name: mc.headsUpDisplay(hud_name, query=True, visible=True)
+            for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)
+        }
 
         # disable current hud
         for hud, visible in self._hud_backup.items():
             if visible:
                 mc.headsUpDisplay(hud, edit=True, visible=False)
-
 
         # hud score
         mc.headsUpDisplay(
@@ -157,8 +160,7 @@ class Game(QWidget):
         )
 
     def _create_game_camera(self) -> str:
-        camera, _ = mc.camera(focalLength=300, nearClipPlane=10,
-                              name=f"{PREFIX}_cam")
+        camera, _ = mc.camera(focalLength=300, nearClipPlane=10, name=f"{PREFIX}_cam")
         mc.lookThru(camera)
         mc.viewFit(camera)
         for attr in ["translate", "rotate"]:
@@ -195,7 +197,7 @@ class Game(QWidget):
 
     # -------------- Keyboard Catcher ----------
 
-    def eventFilter(self, watched, event) -> bool:
+    def eventFilter(self, watched: QWidget, event: QEvent) -> bool:  # noqa: N802
         if event.type() == QEvent.KeyPress:
             self.move(event.key())
             return True  # Avoid pickWalk trigger
@@ -278,9 +280,9 @@ class Game(QWidget):
             title="Score",
             button="Ok",
             message=f"Game Over\n\n"
-                    f"Final Score: {self.get_score()}\n"
-                    f"Lines: {self.get_lines()}\n"
-                    f"Final Level: {self.get_level()}",
+            f"Final Score: {self.get_score()}\n"
+            f"Lines: {self.get_lines()}\n"
+            f"Final Level: {self.get_level()}",
         )
 
         self.clean_geo()
@@ -366,7 +368,7 @@ class Game(QWidget):
         self = cls()
         self.prepare_viewport()
         self.showMinimized()
-        self.parent().installEventFilter(self) # install keyboardCatcher
+        self.parent().installEventFilter(self)  # install keyboardCatcher
 
         hud_countdown("Starts in", sec=3)
 

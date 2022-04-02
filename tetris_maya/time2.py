@@ -1,6 +1,6 @@
-from contextlib import contextmanager
 import ctypes
 import platform
+from contextlib import contextmanager
 
 __all__ = ["timer_precision"]
 
@@ -15,7 +15,7 @@ def timer_precision(ms: int = 1):
     is_win = platform.system() == "Windows"
 
     if is_win:
-        winmm = ctypes.WinDLL('winmm')
+        winmm = ctypes.WinDLL("winmm")
         winmm.timeBeginPeriod(ms)
 
         try:
