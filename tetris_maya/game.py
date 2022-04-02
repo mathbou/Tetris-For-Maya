@@ -259,16 +259,20 @@ class Game(QWidget):
                 mc.delete(grp)
 
     def get_score(self) -> int:
+        """Should be used for ui purpose only."""
         return self._score
 
     def update_score(self, rows: int):
         self._score += SCORE_TABLE.get(rows, 0)
 
     def get_lines(self) -> int:
+        """Should be used for ui purpose only."""
         return self._lines
 
     def get_level(self) -> int:
-        return self._level
+        """Should be used for ui purpose only."""
+        # For programming purposes, the first level is 0, so it needs an +1 offset for the ui.
+        return self._level + 1
 
     def update_level(self, line_count: int):
         self._lines += line_count
