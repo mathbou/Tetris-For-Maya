@@ -249,7 +249,7 @@ class Game(QWidget):
         """Value is in second."""
         return self._time_step
 
-    def update_time_step(self, level: int, multiplier: float = 0.5):
+    def update_time_step(self, level: int, multiplier: float = 0.66):
         self._time_step = TIME_STEP * (multiplier ** level)
 
     def remove_empty_groups(self):
