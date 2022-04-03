@@ -162,7 +162,10 @@ class Game(QWidget):
     def _create_game_camera(self) -> str:
         camera, _ = mc.camera(focalLength=300, nearClipPlane=10, name=f"{PREFIX}_cam")
         mc.lookThru(camera)
+
+        mc.refresh()
         mc.viewFit(camera)
+
         for attr in ["translate", "rotate"]:
             mc.setAttr(f"{camera}.{attr}", lock=True)
 
@@ -171,7 +174,10 @@ class Game(QWidget):
     def prepare_viewport(self):
         mel.eval('setNamedPanelLayout("Single Perspective View")')
 
-        mc.workspaceLayoutManager(collapseMainWindowControl=True)
+        self._editor_backup = {}
+        for ui in ["ChannelBoxLayerEditor", "ToolSettings"]:
+            self._editor_backup[ui] = mc.workspaceControl(ui, query=True, collapse=True)
+            mc.workspaceControl(ui, edit=True, collapse=True)
 
         self._create_game_camera()
 
@@ -192,7 +198,8 @@ class Game(QWidget):
             mc.headsUpDisplay(hud, edit=True, visible=state)
 
     def restore_viewport(self):
-        mc.workspaceLayoutManager(restoreMainWindowControls=True)
+        for ui, collapse in self._editor_backup.items():
+            mc.workspaceControl(ui, edit=True, collapse=collapse)
 
         for attr, value in self._panel_backup.items():
             mc.modelEditor("modelPanel4", edit=True, **{attr: value})
