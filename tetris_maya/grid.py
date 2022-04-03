@@ -4,6 +4,7 @@ from typing import ClassVar, List, Optional, Tuple
 
 import maya.cmds as mc
 from maya.app.type import typeToolSetup
+from unittest.mock import patch
 
 from .constants import PREFIX
 from .math2 import absmax, rotate_point
@@ -90,7 +91,10 @@ class Grid:
         # --------- Square title ---------
 
         type_node = mc.createNode("type", n="type#", skipSelect=True)
-        type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
+
+        with patch('maya.app.type.typeToolSetup.IN_BATCH_MODE', True): # avoid AE to be shown after `type` creation
+            type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
+
         type_extrude_node = mc.listConnections(type_node, type="typeExtrude")[0]
 
         mc.setAttr(f"{type_extrude_node}.enableExtrusion", False)
