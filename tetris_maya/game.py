@@ -171,6 +171,8 @@ class Game(QWidget):
     def prepare_viewport(self):
         mel.eval('setNamedPanelLayout("Single Perspective View")')
 
+        mc.workspaceLayoutManager(collapseMainWindowControl=True)
+
         self._create_game_camera()
 
         self._panel_backup = {}
@@ -190,6 +192,8 @@ class Game(QWidget):
             mc.headsUpDisplay(hud, edit=True, visible=state)
 
     def restore_viewport(self):
+        mc.workspaceLayoutManager(restoreMainWindowControls=True)
+
         for attr, value in self._panel_backup.items():
             mc.modelEditor("modelPanel4", edit=True, **{attr: value})
 
