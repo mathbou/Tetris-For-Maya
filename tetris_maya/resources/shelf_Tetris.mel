@@ -1,4 +1,4 @@
-global proc shelf_Game () {
+global proc shelf_Tetris () {
     global string $gBuffStr;
     global string $gBuffStr0;
     global string $gBuffStr1;
