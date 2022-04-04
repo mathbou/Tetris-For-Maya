@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import maya.cmds as mc
 
@@ -50,7 +49,7 @@ class Tetrimino(object):
 class TetriminoType(object):
     _types = []  # type: ClassVar[list[TetriminoType]]
 
-    def __init__(self, name,cubes,color):
+    def __init__(self, name, cubes, color):
         # type: (unicode, tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]], tuple[float, float, float]) -> None
         self.name = name
         self.cubes = cubes
@@ -78,7 +77,7 @@ S = TetriminoType(name="S", cubes=((0, 0), (0, -1), (1, 0), (-1, -1)), color=(0.
 I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0.5, 1))  # noqa: E741
 
 
-def tetrimino_maker(t_type, id = 0):  # noqa: A002
+def tetrimino_maker(t_type, id=0):  # noqa: A002
     # type: (TetriminoType, int) -> Tetrimino
     name = "{}{}".format(t_type.name, id)
 

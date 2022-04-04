@@ -17,15 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import math
 
 __all__ = ["rotate_point", "absmax"]
 
 
-def rotate_point(point, angle, origin = (0, 0)):
+def rotate_point(point, angle, origin=(0, 0)):
     # type: (tuple[float, float], float, tuple[float, float]) -> tuple[float, float]
     """2D rotation on XY plane
 

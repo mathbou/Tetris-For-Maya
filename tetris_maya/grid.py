@@ -17,24 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import division
-from __future__ import with_statement
-from __future__ import absolute_import
-from __future__ import unicode_literals
-import math
-from .enum import IntEnum
+from __future__ import absolute_import, division, unicode_literals, with_statement
 
-# from unittest.mock import patch
+import math
+from itertools import ifilter, imap, izip
 
 import maya.cmds as mc
 from maya.app.type import typeToolSetup
 
 from .constants import PREFIX
+from .enum import IntEnum
 from .math2 import absmax, rotate_point
 from .tetrimino import O, Tetrimino
-from itertools import imap
-from itertools import izip
-from itertools import ifilter
+
+# from unittest.mock import patch
+
+
 
 __all__ = ["Grid", "Hold"]
 
@@ -46,16 +44,16 @@ class Hold(IntEnum):
 
 
 class Grid(object):
-    ROW_COUNT= 20 # type: ClassVar[int]
-    COLUMN_COUNT= 10 # type: ClassVar[int]
+    ROW_COUNT = 20  # type: ClassVar[int]
+    COLUMN_COUNT = 10  # type: ClassVar[int]
 
-    TOP = ROW_COUNT - 1 # type: ClassVar[int]
-    BOTTOM = 0 # type: ClassVar[int]
-    LEFT = 0 # type: ClassVar[int]
-    RIGHT = COLUMN_COUNT - 1 # type: ClassVar[int]
+    TOP = ROW_COUNT - 1  # type: ClassVar[int]
+    BOTTOM = 0  # type: ClassVar[int]
+    LEFT = 0  # type: ClassVar[int]
+    RIGHT = COLUMN_COUNT - 1  # type: ClassVar[int]
 
-    NEXT_POS = (12.5, 15, -1) # type: ClassVar[tuple[float, float, float]]
-    HOLD_POS = (-3.5, 15, -1) # type: ClassVar[tuple[float, float, float]]
+    NEXT_POS = (12.5, 15, -1)  # type: ClassVar[tuple[float, float, float]]
+    HOLD_POS = (-3.5, 15, -1)  # type: ClassVar[tuple[float, float, float]]
 
     def __init__(self):
         self._make_background()
@@ -63,13 +61,15 @@ class Grid(object):
         self._make_square("Hold", self.HOLD_POS)
         mc.refresh()
 
-        self._matrix = [[None] * self.COLUMN_COUNT for _ in xrange(self.ROW_COUNT)] # type: list[list[Optional[unicode]]]
+        self._matrix = [
+            [None] * self.COLUMN_COUNT for _ in xrange(self.ROW_COUNT)
+        ]  # type: list[list[Optional[unicode]]]
 
-        self.active_tetrimino = None # type: Optional[Tetrimino]
-        self._next_tetrimino = None # type: Optional[Tetrimino]
+        self.active_tetrimino = None  # type: Optional[Tetrimino]
+        self._next_tetrimino = None  # type: Optional[Tetrimino]
 
-        self._hold_tetrimino = None # type: Optional[Tetrimino]
-        self._can_hold= True # type: bool
+        self._hold_tetrimino = None  # type: Optional[Tetrimino]
+        self._can_hold = True  # type: bool
 
     @classmethod
     def _make_background(cls):
@@ -120,7 +120,7 @@ class Grid(object):
 
         type_node = mc.createNode("type", n="type#", skipSelect=True)
 
-        typeToolSetup.IN_BATCH_MODE = True # avoid AE to be shown after `type` creation
+        typeToolSetup.IN_BATCH_MODE = True  # avoid AE to be shown after `type` creation
         type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
         typeToolSetup.IN_BATCH_MODE = False
 
@@ -144,7 +144,7 @@ class Grid(object):
 
         return vertically_inside and horizontally_inside
 
-    def cell_is_available(self, x, y, whitelist = None):
+    def cell_is_available(self, x, y, whitelist=None):
         # type: (int, int, list[str]) -> bool
         whitelist = list(whitelist) or []
         whitelist.append(None)
@@ -153,9 +153,7 @@ class Grid(object):
 
         return cell in whitelist
 
-    def cells_are_available(
-        self, positions, whitelist = None, offset_x = 0, offset_y = 0
-    ):
+    def cells_are_available(self, positions, whitelist=None, offset_x=0, offset_y=0):
         # type: (list[tuple[int, int]], tuple[str, ...], int, int) -> bool
         for (x, y) in positions:
             ox, oy = imap(int, (x + offset_x, y + offset_y))
@@ -193,13 +191,13 @@ class Grid(object):
             return True
         return False
 
-    def rotate(self, tetrimino, angle = -90):
+    def rotate(self, tetrimino, angle=-90):
         # type: (Tetrimino, int) -> bool
         if tetrimino.type == O.name:
             return False
 
         origin_x, origin_y = tetrimino.position
-        new_cube_pos = [] # type: list[tuple[int, int]]
+        new_cube_pos = []  # type: list[tuple[int, int]]
 
         global_offset_x, global_offset_y = 0, 0
 
@@ -261,7 +259,7 @@ class Grid(object):
 
     def _move_to_hold(self, tetrimino):
         # type: (Tetrimino) -> None
-        local_center = [c - p for c, p in izip(mc.objectCenter(tetrimino.root), tetrimino.position)] # only return x, y
+        local_center = [c - p for c, p in izip(mc.objectCenter(tetrimino.root), tetrimino.position)]  # only return x, y
         x, y = [h - c for h, c in izip(self.HOLD_POS, local_center)]
         mc.move(x, y, 0, tetrimino.root, absolute=True)
         mc.scale(0.85, 0.85, 0.85, tetrimino.root, absolute=True)

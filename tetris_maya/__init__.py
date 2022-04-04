@@ -24,8 +24,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import os.path
 
@@ -40,5 +39,5 @@ def launch():
 
 def install_shelf():
     parent = os.path.dirname(__file__)
-    shelf_location = os.path.normpath(os.path.join(parent, "resources", "shelf_Tetris.mel")).replace(os.sep, '/')
+    shelf_location = os.path.normpath(os.path.join(parent, "resources", "shelf_Tetris.mel")).replace(os.sep, "/")
     mel.eval('loadNewShelf "{}"'.format(shelf_location))

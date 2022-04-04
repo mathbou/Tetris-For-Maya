@@ -17,14 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import with_statement
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
+from __future__ import absolute_import, division, unicode_literals, with_statement
+
 import random
 import time
-from .enum import IntEnum
-
 
 import maya.cmds as mc
 import maya.mel as mel
@@ -34,6 +30,7 @@ from PySide2.QtWidgets import QWidget
 
 from . import maya2
 from .constants import PREFIX, SCORE_TABLE, TIME_STEP
+from .enum import IntEnum
 from .grid import Grid, Hold
 from .tetrimino import TetriminoType
 from .time2 import timer_precision
@@ -63,7 +60,7 @@ class LoopWorker(QObject):
     finished = Signal()
     canceled = Signal()
 
-    def __init__(self, row_count, time_step, max_frequency = 60):
+    def __init__(self, row_count, time_step, max_frequency=60):
         # type: (int, float, int) -> None
         self.__loop_count = row_count
         self.__time_step = time_step
@@ -112,7 +109,7 @@ class Game(QWidget):
         self._lines = 0
         self._loop_counter = 0
 
-        self._game_huds = [] # type: list[maya2.HeadsUpDisplay]
+        self._game_huds = []  # type: list[maya2.HeadsUpDisplay]
 
         self.update_time_step(self._level)
         self.update_tetrimino_queue()
@@ -139,9 +136,10 @@ class Game(QWidget):
         mc.delete("{}_*".format(PREFIX))
 
     def _prepare_hud(self):
-        self._hud_backup = dict((
-            hud_name, mc.headsUpDisplay(hud_name, query=True, visible=True))
-            for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True))
+        self._hud_backup = dict(
+            (hud_name, mc.headsUpDisplay(hud_name, query=True, visible=True))
+            for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)
+        )
 
         # disable current hud
         for hud, visible in self._hud_backup.items():
@@ -207,7 +205,7 @@ class Game(QWidget):
         return camera
 
     def prepare_viewport(self):
-        mel.eval(u'setNamedPanelLayout("Single Perspective View")')
+        mel.eval('setNamedPanelLayout("Single Perspective View")')
 
         self._editor_backup = {}
         for ui in ["ChannelBoxLayerEditor", "ToolSettings"]:
@@ -297,7 +295,7 @@ class Game(QWidget):
         """Value is in second."""
         return self._time_step
 
-    def update_time_step(self, level, multiplier = 0.66):
+    def update_time_step(self, level, multiplier=0.66):
         # type: (int, float) -> None
         self._time_step = TIME_STEP * (multiplier ** level)
 
@@ -338,7 +336,7 @@ class Game(QWidget):
             title="Score",
             button="Ok",
             message="Game Over\n\n"
-            "Final Score: {}\nLines: {}\nFinal Level: {}".format(self.get_score(), self.get_lines(), self.get_level())
+            "Final Score: {}\nLines: {}\nFinal Level: {}".format(self.get_score(), self.get_lines(), self.get_level()),
         )
 
         self.clean_geo()
