@@ -55,7 +55,7 @@ class HeadsUpDisplay:
         self._name = name
 
     @classmethod
-    def add(cls, name: str, block: int, section: int, **kwargs: Any):
+    def add(cls, name: str, block: int, section: int, **kwargs: Any) -> "HeadsUpDisplay":
         mc.headsUpDisplay(name, block=block, section=section, **kwargs)
 
         return cls(name)
