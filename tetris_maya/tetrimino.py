@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from dataclasses import dataclass, field
-from typing import ClassVar, List, Tuple
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import maya.cmds as mc
 
@@ -27,39 +27,45 @@ from .constants import PREFIX
 __all__ = ["TetriminoType", "Tetrimino"]
 
 
-@dataclass(frozen=True)
-class Tetrimino:
-    type: str  # noqa: A003
-    root: str
-    cubes: Tuple[str, str, str, str]
+class Tetrimino(object):
+    def __init__(self, type, root, cubes):
+        # type: (unicode, unicode, tuple[unicode, unicode, unicode, unicode]) -> None
+        self.type = type
+        self.root = root
+        self.cubes = cubes
 
     @property
-    def position(self) -> Tuple[float, float]:
+    def position(self):
+        # type: () -> tuple[float, float]
         """Get (x, y) world position of the root group"""
         return mc.xform(self.root, query=True, worldSpace=True, translation=True)[:2]
 
     @property
-    def cube_positions(self) -> List[Tuple[float, float]]:
+    def cube_positions(self):
+        # type: () -> list[tuple[float, float]]
         """Get (x, y) world positions for each cube"""
         return [mc.xform(cube, query=True, worldSpace=True, translation=True)[:2] for cube in self.cubes]
 
 
-@dataclass(frozen=True)
-class TetriminoType:
-    name: str
-    cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]]
-    color: Tuple[float, float, float]
-    _types: ClassVar[List["TetriminoType"]] = field(default=[], init=False)
+class TetriminoType(object):
+    _types = []  # type: ClassVar[list[TetriminoType]]
 
-    def __post_init__(self):
+    def __init__(self, name,cubes,color):
+        # type: (unicode, tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]], tuple[float, float, float]) -> None
+        self.name = name
+        self.cubes = cubes
+        self.color = color
+
         # Register tetrimino type
         self._types.append(self)
 
     @classmethod
-    def get_all(cls) -> List["TetriminoType"]:
+    def get_all(cls):
+        # type: () -> list[TetriminoType]
         return cls._types
 
-    def make(self, id: int) -> Tetrimino:  # noqa: A002
+    def make(self, id):  # noqa: A002
+        # type: () -> Tetrimino
         return tetrimino_maker(self, id)
 
 
@@ -72,8 +78,9 @@ S = TetriminoType(name="S", cubes=((0, 0), (0, -1), (1, 0), (-1, -1)), color=(0.
 I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0.5, 1))  # noqa: E741
 
 
-def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:  # noqa: A002
-    name = f"{t_type.name}{id}"
+def tetrimino_maker(t_type, id = 0):  # noqa: A002
+    # type: (TetriminoType, int) -> Tetrimino
+    name = "{}{}".format(t_type.name, id)
 
     tetrimino_cubes = []
 
@@ -87,10 +94,10 @@ def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:  # noqa: A
         createUVs=False,
         constructionHistory=False,
         axis=(0, 1, 0),
-        name=f"{PREFIX}_tetrimino{name}0",
+        name="{}_tetrimino{}0".format(PREFIX, name),
     )[0]
     mc.polyBevel3(
-        f"{tetrimino_cube}.e[0:11]",
+        "{}.e[0:11]".format(tetrimino_cube),
         segments=1,
         constructionHistory=False,
         offset=0.1,
@@ -99,7 +106,8 @@ def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:  # noqa: A
         angleTolerance=30,
     )
     mc.polyColorPerVertex(rgb=t_type.color, colorDisplayOption=True, notUndoable=True)
-    mc.move(*t_type.cubes[0], 0, tetrimino_cube, absolute=True)
+    x, y = t_type.cubes[0]
+    mc.move(x, y, 0, tetrimino_cube, absolute=True)
 
     tetrimino_cubes.append(tetrimino_cube)
 
@@ -108,10 +116,10 @@ def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:  # noqa: A
         mc.move(tx, ty, 0, duplicate_cube, absolute=True)
         tetrimino_cubes.append(duplicate_cube)
 
-    group = mc.group(tetrimino_cubes, name=f"{PREFIX}_tetrimino{name}_grp")
+    group = mc.group(tetrimino_cubes, name="{}_tetrimino{}_grp".format(PREFIX, name))
     mc.xform(group, pivots=(0, 0, 0), worldSpace=True)
 
-    cubes = tuple(f"{group}|{cube}" for cube in tetrimino_cubes)  # way faster than listRelatives
+    cubes = tuple("{}|{}".format(group, cube) for cube in tetrimino_cubes)  # way faster than listRelatives
 
     mc.select(clear=True)
 

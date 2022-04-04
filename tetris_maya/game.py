@@ -17,10 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import with_statement
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 import random
 import time
-from enum import IntEnum
-from typing import List
+from .enum import IntEnum
+
 
 import maya.cmds as mc
 import maya.mel as mel
@@ -59,11 +63,12 @@ class LoopWorker(QObject):
     finished = Signal()
     canceled = Signal()
 
-    def __init__(self, row_count: int, time_step: float, max_frequency: int = 60):
+    def __init__(self, row_count, time_step, max_frequency = 60):
+        # type: (int, float, int) -> None
         self.__loop_count = row_count
         self.__time_step = time_step
         self.__max_frequency = max_frequency
-        super().__init__()
+        super(LoopWorker, self).__init__()
 
         self.finished.connect(self.deleteLater)
         self.canceled.connect(self.deleteLater)
@@ -75,11 +80,11 @@ class LoopWorker(QObject):
         f_step = self.__time_step / self.__max_frequency
 
         with timer_precision():
-            for _ in range(self.__loop_count):
+            for _ in xrange(self.__loop_count):
                 duration = 0
 
                 while duration < self.__time_step:
-                    start = time.perf_counter()
+                    start = time.clock()
                     if self._is_stopped:
                         self.finished.emit()
                         return
@@ -88,8 +93,7 @@ class LoopWorker(QObject):
                         return
                     else:
                         time.sleep(f_step)
-                    duration += time.perf_counter() - start
-
+                    duration += time.clock() - start
                 self.step.emit()
 
         self.finished.emit()
@@ -108,7 +112,7 @@ class Game(QWidget):
         self._lines = 0
         self._loop_counter = 0
 
-        self._game_huds: List[maya2.HeadsUpDisplay] = []
+        self._game_huds = [] # type: list[maya2.HeadsUpDisplay]
 
         self.update_time_step(self._level)
         self.update_tetrimino_queue()
@@ -117,27 +121,27 @@ class Game(QWidget):
 
         self._thread = QThread()
 
-        super().__init__(parent=maya2.get_main_window())
+        super(Game, self).__init__(parent=maya2.get_main_window())
 
-    def close(self) -> bool:
+    def close(self):
+        # type: () -> bool
         self._thread.quit()
         self._thread.deleteLater()
 
         self.parent().removeEventFilter(self)
 
-        return super().close()
+        return super(Game, self).close()
 
     # --------------Game UI----------
 
     @staticmethod
     def clean_geo():
-        mc.delete(f"{PREFIX}_*")
+        mc.delete("{}_*".format(PREFIX))
 
     def _prepare_hud(self):
-        self._hud_backup = {
-            hud_name: mc.headsUpDisplay(hud_name, query=True, visible=True)
-            for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True)
-        }
+        self._hud_backup = dict((
+            hud_name, mc.headsUpDisplay(hud_name, query=True, visible=True))
+            for hud_name in mc.headsUpDisplay(query=True, listHeadsUpDisplays=True))
 
         # disable current hud
         for hud, visible in self._hud_backup.items():
@@ -145,8 +149,8 @@ class Game(QWidget):
                 mc.headsUpDisplay(hud, edit=True, visible=False)
 
         hud_score = maya2.HeadsUpDisplay.add(
-            f"{PREFIX}_score_hud",
-            block=11,
+            "{}_score_hud".format(PREFIX),
+            block=21,
             section=0,
             label="Score :",
             command=self.get_score,
@@ -157,8 +161,8 @@ class Game(QWidget):
         self._game_huds.append(hud_score)
 
         hud_level = maya2.HeadsUpDisplay.add(
-            f"{PREFIX}_level_hud",
-            block=12,
+            "{}_level_hud".format(PREFIX),
+            block=22,
             section=0,
             label="Level :",
             command=self.get_level,
@@ -169,8 +173,8 @@ class Game(QWidget):
         self._game_huds.append(hud_level)
 
         hud_lines = maya2.HeadsUpDisplay.add(
-            f"{PREFIX}_lines_hud",
-            block=13,
+            "{}_lines_hud".format(PREFIX),
+            block=23,
             section=0,
             label="Level :",
             command=self.get_lines,
@@ -183,26 +187,27 @@ class Game(QWidget):
         for i, command in enumerate(Action):
             name = command.name.replace("_", " ").title()
             key_str = QKeySequence(command.value).toString()
-            label = f"{name}: {key_str}"
+            label = "{}: {}".format(name, key_str)
 
-            hud = maya2.HeadsUpDisplay.add(f"{PREFIX}_{command.name}", block=i + 10, section=5, label=label)
+            hud = maya2.HeadsUpDisplay.add("{}_{}".format(PREFIX, command.name), block=i + 10, section=5, label=label)
 
             self._game_huds.append(hud)
 
-    def _create_game_camera(self) -> str:
-        camera, _ = mc.camera(focalLength=300, nearClipPlane=10, name=f"{PREFIX}_cam")
+    def _create_game_camera(self):
+        # type: () -> str
+        camera, _ = mc.camera(focalLength=300, nearClipPlane=10, name="{}_cam".format(PREFIX))
         mc.lookThru(camera)
 
         mc.refresh()
         mc.viewFit(camera)
 
         for attr in ["translate", "rotate"]:
-            mc.setAttr(f"{camera}.{attr}", lock=True)
+            mc.setAttr("{}.{}".format(camera, attr), lock=True)
 
         return camera
 
     def prepare_viewport(self):
-        mel.eval('setNamedPanelLayout("Single Perspective View")')
+        mel.eval(u'setNamedPanelLayout("Single Perspective View")')
 
         self._editor_backup = {}
         for ui in ["ChannelBoxLayerEditor", "ToolSettings"]:
@@ -213,7 +218,7 @@ class Game(QWidget):
 
         self._panel_backup = {}
         for attr in ("hud", "grid", "handles"):
-            self._panel_backup[attr] = mc.modelEditor("modelPanel4", query=True, **{attr: True})
+            self._panel_backup[str(attr)] = mc.modelEditor("modelPanel4", query=True, **{str(attr): True})
 
         mc.modelEditor("modelPanel4", edit=True, hud=True, grid=False, handles=False)
 
@@ -237,15 +242,17 @@ class Game(QWidget):
 
     # -------------- Keyboard Catcher ----------
 
-    def eventFilter(self, watched: QWidget, event: QEvent) -> bool:  # noqa: N802
+    def eventFilter(self, watched, event):  # noqa: N802
+        # type: (QWidget, QEvent) -> bool
         if event.type() == QEvent.KeyPress:
             self.move(event.key())
             return True  # Avoid pickWalk trigger
-        return super().eventFilter(watched, event)
+        return super(Game, self).eventFilter(watched, event)
 
     # ---------------------- Game Actions ----------------------
 
-    def move(self, value: Action):
+    def move(self, value):
+        # type: (Action) -> None
         x, y = 0, 0
 
         if value == Action.LEFT:
@@ -276,7 +283,7 @@ class Game(QWidget):
             self.grid.move(self.grid.active_tetrimino, x, y)
 
     def update_tetrimino_queue(self):
-        new_queue = TetriminoType.get_all().copy()
+        new_queue = list(TetriminoType.get_all())
         random.shuffle(new_queue)
 
         try:
@@ -285,36 +292,43 @@ class Game(QWidget):
             self.tetrimino_type_queue = new_queue
 
     @property
-    def time_step(self) -> float:
+    def time_step(self):
+        # type: () -> float
         """Value is in second."""
         return self._time_step
 
-    def update_time_step(self, level: int, multiplier: float = 0.66):
+    def update_time_step(self, level, multiplier = 0.66):
+        # type: (int, float) -> None
         self._time_step = TIME_STEP * (multiplier ** level)
 
     def remove_empty_groups(self):
-        groups = mc.ls(f"{PREFIX}_*grp", exactType="transform")
+        groups = mc.ls("{}_*grp".format(PREFIX), exactType="transform")
         for grp in groups:
             if not mc.listRelatives(grp, children=True):
                 mc.delete(grp)
 
-    def get_score(self) -> int:
+    def get_score(self):
+        # type: () -> int
         """Should be used for ui purpose only."""
         return self._score
 
-    def update_score(self, rows: int):
+    def update_score(self, rows):
+        # type: (int) -> None
         self._score += SCORE_TABLE.get(rows, 0)
 
-    def get_lines(self) -> int:
+    def get_lines(self):
+        # type: () -> int
         """Should be used for ui purpose only."""
         return self._lines
 
-    def get_level(self) -> int:
+    def get_level(self):
+        # type: () -> int
         """Should be used for ui purpose only."""
         # For programming purposes, the first level is 0, so it needs an +1 offset for the ui.
         return self._level + 1
 
-    def update_level(self, line_count: int):
+    def update_level(self, line_count):
+        # type: (int) -> None
         self._lines += line_count
         self._level = self._lines // 10
         self.update_time_step(self._level)
@@ -323,10 +337,8 @@ class Game(QWidget):
         mc.confirmDialog(
             title="Score",
             button="Ok",
-            message=f"Game Over\n\n"
-            f"Final Score: {self.get_score()}\n"
-            f"Lines: {self.get_lines()}\n"
-            f"Final Level: {self.get_level()}",
+            message="Game Over\n\n"
+            "Final Score: {}\nLines: {}\nFinal Level: {}".format(self.get_score(), self.get_lines(), self.get_level())
         )
 
         self.clean_geo()
@@ -400,7 +412,8 @@ class Game(QWidget):
 
         self.init_loop()
 
-    def post_hold(self, value: Hold):
+    def post_hold(self, value):
+        # type: (Hold) -> None
         """Depending on the hold type, relaunch a worker (swap) or the full loop (push)."""
         if value is Hold.SWAP:
             self.launch_loop_worker()

@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import absolute_import
 import ctypes
 import platform
 from contextlib import contextmanager
@@ -25,7 +26,8 @@ __all__ = ["timer_precision"]
 
 
 @contextmanager
-def timer_precision(ms: int = 1):
+def timer_precision(ms = 1):
+    # type: (int) -> callable
     """Force higher precision timer on Windows.
 
     References:
