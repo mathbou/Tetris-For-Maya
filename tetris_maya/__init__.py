@@ -24,10 +24,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from pathlib import Path
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
+import os.path
 
 import maya.mel as mel
-import pkg_resources
 
 from .game import Game
 
@@ -37,5 +39,6 @@ def launch():
 
 
 def install_shelf():
-    shelf_location = Path(pkg_resources.resource_filename("tetris_maya", "resources/shelf_Tetris.mel"))
-    mel.eval(f'loadNewShelf "{shelf_location.as_posix()}"')
+    parent = os.path.dirname(__file__)
+    shelf_location = os.path.normpath(os.path.join(parent, "resources", "shelf_Tetris.mel")).replace(os.sep, '/')
+    mel.eval('loadNewShelf "{}"'.format(shelf_location))

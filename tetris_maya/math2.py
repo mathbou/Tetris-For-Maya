@@ -17,13 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import math
-from typing import Tuple
 
 __all__ = ["rotate_point", "absmax"]
 
 
-def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, float] = (0, 0)) -> Tuple[float, float]:
+def rotate_point(point, angle, origin = (0, 0)):
+    # type: (tuple[float, float], float, tuple[float, float]) -> tuple[float, float]
     """2D rotation on XY plane
 
     Args:
@@ -41,7 +44,8 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
     return qx, qy
 
 
-def absmax(a: float, b: float) -> float:
+def absmax(a, b):
+    # type: (float, float) -> float
     """Get the absolute highest number.
 
     Examples:

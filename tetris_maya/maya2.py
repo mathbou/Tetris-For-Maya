@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import time
-from typing import Any
 
 import maya.cmds as mc
 from maya import OpenMayaUI as omui  # noqa: N813
@@ -28,7 +29,8 @@ from shiboken2 import wrapInstance
 __all__ = ["get_main_window", "hud_countdown"]
 
 
-def get_main_window() -> QMainWindow:
+def get_main_window():
+    # type: () -> QMainWindow
     maya_main_window_ptr = omui.MQtUtil.mainWindow()
 
     ptr = int(maya_main_window_ptr)
@@ -36,7 +38,8 @@ def get_main_window() -> QMainWindow:
     return wrapInstance(ptr, QMainWindow)
 
 
-def hud_countdown(msg: str, sec: int = 3):
+def hud_countdown(msg, sec = 3):
+    # type: (str, int) -> None
     """.
 
     Raises:
@@ -45,17 +48,19 @@ def hud_countdown(msg: str, sec: int = 3):
     if not sec > 0:
         raise ValueError("Countdown can't be negative")
 
-    for i in range(sec):
+    for i in xrange(sec):
         mc.headsUpMessage("{}: {}".format(msg, sec - i), time=1)
         time.sleep(1)
 
 
-class HeadsUpDisplay:
-    def __init__(self, name: str):
+class HeadsUpDisplay(object):
+    def __init__(self, name):
+        # type: (str) -> None
         self._name = name
 
     @classmethod
-    def add(cls, name: str, block: int, section: int, **kwargs: Any):
+    def add(cls, name, block, section, **kwargs):
+        # type: (str, int, int, Any) -> HeadsUpDisplay
         mc.headsUpDisplay(name, block=block, section=section, **kwargs)
 
         return cls(name)
