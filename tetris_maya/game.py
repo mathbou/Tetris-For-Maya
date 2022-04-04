@@ -1,15 +1,17 @@
 import random
 import time
 from enum import IntEnum
+from typing import List
 
 import maya.cmds as mc
 import maya.mel as mel
 from PySide2.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
+from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import QWidget
 
-from .constants import LEVEL_HUD_NAME, LINES_HUD_NAME, PREFIX, SCORE_HUD_NAME, SCORE_TABLE, TIME_STEP
+from . import maya2
+from .constants import  PREFIX, SCORE_TABLE, TIME_STEP
 from .grid import Grid, Hold
-from .maya2 import get_main_window, hud_countdown
 from .tetrimino import TetriminoType
 from .time2 import timer_precision
 
@@ -19,8 +21,8 @@ __all__ = ["Game"]
 class Action(IntEnum):
     LEFT = Qt.Key.Key_Left
     RIGHT = Qt.Key.Key_Right
-    SOFTD = Qt.Key.Key_Down
-    HARDD = Qt.Key.Key_Space
+    SOFT_DROP = Qt.Key.Key_Down
+    HARD_DROP = Qt.Key.Key_Space
     ROTATE_LEFT = Qt.Key.Key_Z
     ROTATE_RIGHT = Qt.Key.Key_Up
     HOLD = Qt.Key.Key_C
@@ -86,6 +88,9 @@ class Game(QWidget):
         self._level = 0
         self._lines = 0
         self._loop_counter = 0
+
+        self._game_huds: List[maya2.headsUpDisplay] = []
+
         self.update_time_step(self._level)
         self.update_tetrimino_queue()
 
@@ -93,7 +98,7 @@ class Game(QWidget):
 
         self._thread = QThread()
 
-        super().__init__(parent=get_main_window())
+        super().__init__(parent=maya2.get_main_window())
 
     def close(self) -> bool:
         self._thread.quit()
@@ -120,44 +125,44 @@ class Game(QWidget):
             if visible:
                 mc.headsUpDisplay(hud, edit=True, visible=False)
 
-        # hud score
-        mc.headsUpDisplay(
-            SCORE_HUD_NAME,
-            section=0,
-            block=11,
-            blockSize="small",
-            label="Score :",
-            command=self.get_score,
-            labelFontSize="large",
-            dataFontSize="large",
-            attachToRefresh=True,
-        )
+        hud_score = maya2.headsUpDisplay.add(f"{PREFIX}_score_hud",
+                                 block=11,
+                                 section=0,
+                                 label="Score :",
+                                 command=self.get_score,
+                                 labelFontSize="large",
+                                 dataFontSize="large",
+                                 attachToRefresh=True)
+        self._game_huds.append(hud_score)
 
-        # hud level
-        mc.headsUpDisplay(
-            LEVEL_HUD_NAME,
-            section=0,
-            block=12,
-            blockSize="small",
-            label="Level :",
-            command=self.get_level,
-            labelFontSize="large",
-            dataFontSize="large",
-            attachToRefresh=True,
-        )
+        hud_level = maya2.headsUpDisplay.add(f"{PREFIX}_level_hud",
+                                             block=12,
+                                             section=0,
+                                             label="Level :",
+                                             command=self.get_level,
+                                             labelFontSize="large",
+                                             dataFontSize="large",
+                                             attachToRefresh=True)
+        self._game_huds.append(hud_level)
 
-        # hud lines
-        mc.headsUpDisplay(
-            LINES_HUD_NAME,
-            section=0,
-            block=13,
-            blockSize="small",
-            label="Lines :",
-            command=self.get_lines,
-            labelFontSize="large",
-            dataFontSize="large",
-            attachToRefresh=True,
-        )
+        hud_lines = maya2.headsUpDisplay.add(f"{PREFIX}_lines_hud",
+                                             block=13,
+                                             section=0,
+                                             label="Level :",
+                                             command=self.get_lines,
+                                             labelFontSize="large",
+                                             dataFontSize="large",
+                                             attachToRefresh=True)
+        self._game_huds.append(hud_lines)
+
+        for i, command in enumerate(Action):
+            name = command.name.replace("_", " ").title()
+            key_str = QKeySequence(command.value).toString()
+            label = f"{name}: {key_str}"
+
+            hud = maya2.headsUpDisplay.add(f"{PREFIX}_{command.name}", block=i+10, section=5, label=label)
+
+            self._game_huds.append(hud)
 
     def _create_game_camera(self) -> str:
         camera, _ = mc.camera(focalLength=300, nearClipPlane=10, name=f"{PREFIX}_cam")
@@ -190,9 +195,8 @@ class Game(QWidget):
         self._prepare_hud()
 
     def _restore_hud(self):
-        mc.headsUpDisplay(SCORE_HUD_NAME, remove=True)
-        mc.headsUpDisplay(LEVEL_HUD_NAME, remove=True)
-        mc.headsUpDisplay(LINES_HUD_NAME, remove=True)
+        for hud in self._game_huds:
+            hud.remove()
 
         for hud, state in self._hud_backup.items():
             mc.headsUpDisplay(hud, edit=True, visible=state)
@@ -223,7 +227,7 @@ class Game(QWidget):
             x, y = -1, 0
         elif value == Action.RIGHT:
             x, y = 1, 0
-        elif value == Action.SOFTD:
+        elif value == Action.SOFT_DROP:
             x, y = 0, -1
             self._score += 1
 
@@ -231,7 +235,7 @@ class Game(QWidget):
             self.grid.rotate(self.grid.active_tetrimino, angle=-90)
         elif value == Action.ROTATE_LEFT:
             self.grid.rotate(self.grid.active_tetrimino, angle=90)
-        elif value == Action.HARDD:
+        elif value == Action.HARD_DROP:
             while self.grid.move(self.grid.active_tetrimino, 0, -1):
                 pass
             self._score += 20
@@ -385,6 +389,6 @@ class Game(QWidget):
         self.showMinimized()
         self.parent().installEventFilter(self)  # install keyboardCatcher
 
-        hud_countdown("Starts in", sec=3)
+        maya2.hud_countdown("Starts in", sec=3)
 
         self.init_loop()
