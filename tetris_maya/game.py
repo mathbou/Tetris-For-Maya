@@ -10,7 +10,7 @@ from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import QWidget
 
 from . import maya2
-from .constants import  PREFIX, SCORE_TABLE, TIME_STEP
+from .constants import PREFIX, SCORE_TABLE, TIME_STEP
 from .grid import Grid, Hold
 from .tetrimino import TetriminoType
 from .time2 import timer_precision
@@ -89,7 +89,7 @@ class Game(QWidget):
         self._lines = 0
         self._loop_counter = 0
 
-        self._game_huds: List[maya2.headsUpDisplay] = []
+        self._game_huds: List[maya2.HeadsUpDisplay] = []
 
         self.update_time_step(self._level)
         self.update_tetrimino_queue()
@@ -125,34 +125,40 @@ class Game(QWidget):
             if visible:
                 mc.headsUpDisplay(hud, edit=True, visible=False)
 
-        hud_score = maya2.headsUpDisplay.add(f"{PREFIX}_score_hud",
-                                 block=11,
-                                 section=0,
-                                 label="Score :",
-                                 command=self.get_score,
-                                 labelFontSize="large",
-                                 dataFontSize="large",
-                                 attachToRefresh=True)
+        hud_score = maya2.HeadsUpDisplay.add(
+            f"{PREFIX}_score_hud",
+            block=11,
+            section=0,
+            label="Score :",
+            command=self.get_score,
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=True,
+        )
         self._game_huds.append(hud_score)
 
-        hud_level = maya2.headsUpDisplay.add(f"{PREFIX}_level_hud",
-                                             block=12,
-                                             section=0,
-                                             label="Level :",
-                                             command=self.get_level,
-                                             labelFontSize="large",
-                                             dataFontSize="large",
-                                             attachToRefresh=True)
+        hud_level = maya2.HeadsUpDisplay.add(
+            f"{PREFIX}_level_hud",
+            block=12,
+            section=0,
+            label="Level :",
+            command=self.get_level,
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=True,
+        )
         self._game_huds.append(hud_level)
 
-        hud_lines = maya2.headsUpDisplay.add(f"{PREFIX}_lines_hud",
-                                             block=13,
-                                             section=0,
-                                             label="Level :",
-                                             command=self.get_lines,
-                                             labelFontSize="large",
-                                             dataFontSize="large",
-                                             attachToRefresh=True)
+        hud_lines = maya2.HeadsUpDisplay.add(
+            f"{PREFIX}_lines_hud",
+            block=13,
+            section=0,
+            label="Level :",
+            command=self.get_lines,
+            labelFontSize="large",
+            dataFontSize="large",
+            attachToRefresh=True,
+        )
         self._game_huds.append(hud_lines)
 
         for i, command in enumerate(Action):
@@ -160,7 +166,7 @@ class Game(QWidget):
             key_str = QKeySequence(command.value).toString()
             label = f"{name}: {key_str}"
 
-            hud = maya2.headsUpDisplay.add(f"{PREFIX}_{command.name}", block=i+10, section=5, label=label)
+            hud = maya2.HeadsUpDisplay.add(f"{PREFIX}_{command.name}", block=i + 10, section=5, label=label)
 
             self._game_huds.append(hud)
 
