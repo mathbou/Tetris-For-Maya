@@ -14,7 +14,7 @@ Copy the `tetris_maya` folder into your maya script folder
 
 As the project is build as a package, you also can install it using `mayapy` and `pip`.
 
-- Win: `mayapy.exe -m pip install git+https://gitlab.com/mathbou/TetrisMaya.git  --target %USERPROFILE%\maya\<MAYA_VERSION>\prefs\scripts`
+- Win: `mayapy.exe -m pip install git+https://gitlab.com/mathbou/TetrisMaya.git  --target %USERPROFILE%\Documents/maya\<MAYA_VERSION>\prefs\scripts`
 - Lnx: `mayapy -m pip install git+https://gitlab.com/mathbou/TetrisMaya.git --target ~/maya/<MAYA_VERSION>/prefs/scripts`
 
 ## 📚 Add shelf
