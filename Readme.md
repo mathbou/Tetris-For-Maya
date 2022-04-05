@@ -6,7 +6,7 @@
 
 **{- Requires Maya 2022+ -}**
 
-Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/master/TetrisMaya-master.zip) 
+Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/master/TetrisMaya-master.zip?path=tetris_maya) 
 
 Copy the `tetris_maya` folder into your maya script folder  
 - Win: `%USERPROFILE%\maya\<MAYA_VERSION>\prefs\scripts`
@@ -19,12 +19,12 @@ As the project is build as a package, you also can install it using `mayapy` and
 - Win: `mayapy.exe -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target %USERPROFILE%\Documents/maya\<MAYA_VERSION>\prefs\scripts`
 - Lnx: `mayapy -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target ~/maya/<MAYA_VERSION>/prefs/scripts`
 
-#### 👴 Backport
+### 🧙‍ Backport 2017-2022
 
-A special version for Maya 2017-2020 is available in the [backport-27](https://gitlab.com/mathbou/TetrisMaya/-/tree/backport_27) branch.
+A backport of the game for Maya 2017-2020 is available in the [backport-27](https://gitlab.com/mathbou/TetrisMaya/-/tree/backport_27) branch.
 
-Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/backport_27/TetrisMaya-backport_27.zip). 
-Then follow the exact same [instructions](#installation) as the standard version.
+Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/backport_27/TetrisMaya-backport_27.zip?path=tetris_maya),
+then copy the `tetris_maya` folder into your [maya script folder](#installation).
 
 If you want to use the [alternative installation](#alternative-installation), replace the package name `tetris-maya` by `tetris-maya-backport`.
 
@@ -87,11 +87,12 @@ I also made a demo of this version:
 And again, another big rewrite. But why go back on this project after another 4 years ? Well, there are three reasons:
 
 First: Maya finally uses Python 3.7+, so it's an occasion to rewrite the project using more modern syntax and keep learning while doing it.
-And if you followed correctly, yes, this version is only compatible with **Maya 2022+**
 
 Second: I still wanted to get rid of Pynput, and made it completely dependency-free. 
 This part actually took a lot of thinking and a big change on the game loop architecture.
 
-Third: I wanted to share it 😃 Until now, I wasn't comfortable enough to publish the code, mostly because I find it ugly, and it wasn't reflecting my skills.
-Also, there were technical concerns, the [V1](#v1) was unusable due to its age, and the [V2](#v2) was too hard to install.
+Finally, the most important one, I wanted to share it 😃 Until now, I wasn't comfortable enough to publish the code, 
+mostly because I find it ugly.
+Also, there were technical concerns, the [V1](#v1) was unusable due to its age, 
+and the [V2](#v2) was too hard to install for the average user.
 
