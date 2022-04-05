@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "tetris-maya"
+name = "tetris-maya-backport"
 version = "3.0.0"
 description = ""
 authors = ["Mathieu <923463-mathbou@users.noreply.gitlab.com>"]
 license = "GPL-3.0-or-later"
+packages = [
+    { include = "tetris_maya" },
+]
 
 [tool.poetry.dependencies]
 python = "2.7.*"
