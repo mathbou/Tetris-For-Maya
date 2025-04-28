@@ -3,7 +3,7 @@
 # Version : 2.0
 #
 # Warnings:
-#     - Only work on Maya 2017-2020
+#     - Only works on Maya 2017-2020
 #     - This version requires a separate venv that will launch the keyboard catcher
 #
 #

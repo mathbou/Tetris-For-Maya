@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -17,9 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import math
 from enum import IntEnum
-from typing import ClassVar, List, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar
 from unittest.mock import patch
 
 import maya.cmds as mc
@@ -27,7 +29,10 @@ from maya.app.type import typeToolSetup
 
 from .constants import PREFIX
 from .math2 import absmax, rotate_point
-from .tetrimino import O, Tetrimino
+from .tetrimino import O
+
+if TYPE_CHECKING:
+    from .tetrimino import Tetrimino
 
 __all__ = ["Grid", "Hold"]
 
@@ -47,8 +52,8 @@ class Grid:
     LEFT: ClassVar[int] = 0
     RIGHT: ClassVar[int] = COLUMN_COUNT - 1
 
-    NEXT_POS: ClassVar[Tuple[float, float, float]] = (12.5, 15, -1)
-    HOLD_POS: ClassVar[Tuple[float, float, float]] = (-3.5, 15, -1)
+    NEXT_POS: ClassVar[tuple[float, float, float]] = (12.5, 15, -1)
+    HOLD_POS: ClassVar[tuple[float, float, float]] = (-3.5, 15, -1)
 
     def __init__(self):
         self._make_background()
@@ -56,12 +61,12 @@ class Grid:
         self._make_square("Hold", self.HOLD_POS)
         mc.refresh()
 
-        self._matrix: List[List[Optional[str]]] = [[None] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
+        self._matrix: list[list[str | None]] = [[None] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
 
-        self.active_tetrimino: Optional[Tetrimino] = None
-        self._next_tetrimino: Optional[Tetrimino] = None
+        self.active_tetrimino: Tetrimino | None = None
+        self._next_tetrimino: Tetrimino | None = None
 
-        self._hold_tetrimino: Optional[Tetrimino] = None
+        self._hold_tetrimino: Tetrimino | None = None
         self._can_hold: bool = True
 
     @classmethod
@@ -93,7 +98,7 @@ class Grid:
                 mc.parent(bg_cube, bg_group)
 
     @classmethod
-    def _make_square(cls, text: str, position: Tuple[float, float, float]):
+    def _make_square(cls, text: str, position: tuple[float, float, float]):
         square = mc.polyTorus(
             radius=3.2,
             sectionRadius=0.3,
@@ -111,12 +116,12 @@ class Grid:
 
         type_node = mc.createNode("type", n="type#", skipSelect=True)
 
-        with patch("maya.app.type.typeToolSetup.IN_BATCH_MODE", True):  # avoid AE to be shown after `type` creation
+        with patch("maya.app.type.typeToolSetup.IN_BATCH_MODE", new=True):  # avoid AE to be shown after `type` creation
             type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
 
         type_extrude_node = mc.listConnections(type_node, type="typeExtrude")[0]
 
-        mc.setAttr(f"{type_extrude_node}.enableExtrusion", False)
+        mc.setAttr(f"{type_extrude_node}.enableExtrusion", False)  # noqa: FBT003
         mc.setAttr(f"{type_node}.alignmentMode", 2)  # center
         mc.setAttr(f"{type_node}.fontSize", 1.125)
 
@@ -133,7 +138,7 @@ class Grid:
 
         return vertically_inside and horizontally_inside
 
-    def cell_is_available(self, x: int, y: int, whitelist: List[str] = None) -> bool:
+    def cell_is_available(self, x: int, y: int, whitelist: list[str] | None = None) -> bool:
         whitelist = list(whitelist) or []
         whitelist.append(None)
 
@@ -142,15 +147,16 @@ class Grid:
         return cell in whitelist
 
     def cells_are_available(
-        self, positions: List[Tuple[int, int]], whitelist: Tuple[str, ...] = None, offset_x: int = 0, offset_y: int = 0
+        self,
+        positions: list[tuple[int, int]],
+        whitelist: tuple[str, ...] | None = None,
+        offset_x: int = 0,
+        offset_y: int = 0,
     ) -> bool:
-        for (x, y) in positions:
+        for x, y in positions:
             ox, oy = map(int, (x + offset_x, y + offset_y))
 
-            if not self.inside_grid(ox, oy):
-                return False
-
-            elif not self.cell_is_available(ox, oy, whitelist=whitelist):
+            if not self.inside_grid(ox, oy) or not self.cell_is_available(ox, oy, whitelist=whitelist):
                 return False
 
         return True
@@ -162,6 +168,9 @@ class Grid:
             tetrimino:
             x: offset applied to the tetrimino
             y: offset applied to the tetrimino
+
+        Returns:
+           True if the tetrimino can move to the position.
         """
         return self.cells_are_available(tetrimino.cube_positions, whitelist=tetrimino.cubes, offset_x=x, offset_y=y)
 
@@ -182,7 +191,7 @@ class Grid:
             return False
 
         origin_x, origin_y = tetrimino.position
-        new_cube_pos: List[Tuple[int, int]] = []
+        new_cube_pos: list[tuple[int, int]] = []
 
         global_offset_x, global_offset_y = 0, 0
 
@@ -264,8 +273,7 @@ class Grid:
             mc.refresh()
 
             return exit_code
-        else:
-            return Hold.CANT
+        return Hold.CANT
 
     def update_cells(self, tetrimino: Tetrimino):
         mc.refresh()
@@ -273,7 +281,11 @@ class Grid:
             self._matrix[int(y)][int(x)] = cube
 
     def process_completed_rows(self) -> int:
-        """Check the grid for completed rows. Delete them and move down the others if possible."""
+        """Check the grid for completed rows. Delete them and move down the others if possible.
+
+        Returns:
+            Count of completed rows
+        """
         row_id = 0
         completed_rows = 0
 
@@ -288,7 +300,7 @@ class Grid:
                 moved_down = self._move_down_rows(from_row=row_id)
 
                 # must roll back on previous index if cubes were moved down
-                row_id = row_id - int(moved_down)
+                row_id -= int(moved_down)
 
             row_id += 1
 
@@ -300,6 +312,8 @@ class Grid:
         Warnings:
             Does not check if `from_row` is an empty row.
 
+        Returns:
+            True if the row has been successfully moved down.
         """
         moved_down = False
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -17,16 +17,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import random
 import time
 from enum import IntEnum
-from typing import List
 
 import maya.cmds as mc
 import maya.mel as mel
-from PySide2.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
-from PySide2.QtGui import QKeySequence
-from PySide2.QtWidgets import QWidget
+
+try:
+    from PySide2.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
+    from PySide2.QtGui import QKeySequence
+    from PySide2.QtWidgets import QWidget
+except ImportError:
+    from PySide6.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
+    from PySide6.QtGui import QKeySequence
+    from PySide6.QtWidgets import QWidget
 
 from . import maya2
 from .constants import PREFIX, SCORE_TABLE, TIME_STEP
@@ -83,11 +90,10 @@ class LoopWorker(QObject):
                     if self._is_stopped:
                         self.finished.emit()
                         return
-                    elif self._is_canceled:
+                    if self._is_canceled:
                         self.canceled.emit()
                         return
-                    else:
-                        time.sleep(f_step)
+                    time.sleep(f_step)
                     duration += time.perf_counter() - start
 
                 self.step.emit()
@@ -108,7 +114,7 @@ class Game(QWidget):
         self._lines = 0
         self._loop_counter = 0
 
-        self._game_huds: List[maya2.HeadsUpDisplay] = []
+        self._game_huds: list[maya2.HeadsUpDisplay] = []
 
         self.update_time_step(self._level)
         self.update_tetrimino_queue()
@@ -245,7 +251,7 @@ class Game(QWidget):
 
     # ---------------------- Game Actions ----------------------
 
-    def move(self, value: Action):
+    def move(self, value: Action):  # noqa: C901
         x, y = 0, 0
 
         if value == Action.LEFT:
@@ -268,7 +274,7 @@ class Game(QWidget):
 
         elif value == Action.HOLD:
             hold_code = self.grid.hold()
-            if hold_code in [Hold.SWAP, Hold.PUSH]:
+            if hold_code in {Hold.SWAP, Hold.PUSH}:
                 self.cancel_loop_worker()
                 self.post_hold(hold_code)
 
@@ -290,7 +296,7 @@ class Game(QWidget):
         return self._time_step
 
     def update_time_step(self, level: int, multiplier: float = 0.66):
-        self._time_step = TIME_STEP * (multiplier ** level)
+        self._time_step = TIME_STEP * (multiplier**level)
 
     def remove_empty_groups(self):
         groups = mc.ls(f"{PREFIX}_*grp", exactType="transform")
@@ -299,18 +305,30 @@ class Game(QWidget):
                 mc.delete(grp)
 
     def get_score(self) -> int:
-        """Should be used for ui purpose only."""
+        """Should be used for ui purpose only.
+
+        Returns:
+            Point count.
+        """
         return self._score
 
     def update_score(self, rows: int):
         self._score += SCORE_TABLE.get(rows, 0)
 
     def get_lines(self) -> int:
-        """Should be used for ui purpose only."""
+        """Should be used for ui purpose only.
+
+        Returns:
+            Line count.
+        """
         return self._lines
 
     def get_level(self) -> int:
-        """Should be used for ui purpose only."""
+        """Should be used for ui purpose only.
+
+        Returns:
+            Current level starting from 1.
+        """
         # For programming purposes, the first level is 0, so it needs an +1 offset for the ui.
         return self._level + 1
 
