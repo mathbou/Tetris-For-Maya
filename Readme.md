@@ -10,9 +10,13 @@
 As the project is build as a package, you can install it using `mayapy` and `pip`.
 
 - Win:
-  `mayapy.exe -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target %USERPROFILE%\Documents\maya\<MAYA_VERSION>\prefs\scripts`
+  ```powershell
+  mayapy.exe -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target %USERPROFILE%\Documents\maya\<MAYA_VERSION>\prefs\scripts
+  ```
 - Lnx:
-  `mayapy -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target ~/maya/<MAYA_VERSION>/prefs/scripts`
+  ```sh
+  mayapy -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target ~/maya/<MAYA_VERSION>/prefs/scripts
+  ```
 
 #### 📦 Alternative Installation
 
