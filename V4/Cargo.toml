@@ -1,0 +1,25 @@
+[package]
+name = "tetris-maya"
+version = "4.0.0"
+edition = "2024"
+license = "GPL-3.0+"
+authors = ["Mathieu Bouzard"]
+repository = "https://gitlab.com/mathbou/TetrisMaya"
+
+[lib]
+name = "tetris_maya"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.24.2" }
+pyo3-log = "0.12.3"
+num-traits = "0.2.19"
+stubgen_macro = {path = "./stubgen_macro"}
+pyo3-stub-gen = { version = "0.8.2" , optional = true}
+
+[features]
+stubgen = ["pyo3-stub-gen"]
+
+[[bin]]
+name = "stub_gen"
+doc = false
