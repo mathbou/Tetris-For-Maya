@@ -34,6 +34,7 @@ fn tetris_maya(m: &Bound<'_, PyModule>) -> PyResult<()> {
     pyo3_log::init();
     m.add_class::<tetrimino::Tetrimino>()?;
     m.add_class::<tetrimino::TetriminoLetter>()?;
+    m.add_class::<cube::Cube>()?;
     m.add_class::<grid::Grid>()?;
     m.add_class::<point::Turn>()?;
     Ok(())

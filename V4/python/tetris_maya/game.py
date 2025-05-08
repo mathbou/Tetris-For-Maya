@@ -120,12 +120,11 @@ class Game(QWidget):
         self._loop_counter = 0
 
         self._game_huds: list[maya2.HeadsUpDisplay] = []
+        self._tetrimino_type_queue: list[TetriminoType] = []
 
-        self.update_time_step(self._level)
-        self.update_tetrimino_queue()
+        self.update_time_step()
 
         self.grid = Grid()
-
         self._thread = QThread()
 
         super().__init__(parent=maya2.get_main_window())
@@ -172,7 +171,7 @@ class Game(QWidget):
             block=12,
             section=0,
             label="Level :",
-            command=self.get_level,
+            command=self.get_ui_level,
             labelFontSize="large",
             dataFontSize="large",
             attachToRefresh=True,
@@ -191,12 +190,12 @@ class Game(QWidget):
         )
         self._game_huds.append(hud_lines)
 
-        for i, command in enumerate(Action):
-            name = command.name.replace("_", " ").title()
-            key_str = QKeySequence(command.value).toString()
+        for idx, action in enumerate(Action):
+            name = action.name.replace("_", " ").title()
+            key_str = QKeySequence(action.value).toString()
             label = f"{name}: {key_str}"
 
-            hud = maya2.HeadsUpDisplay.add(f"{PREFIX}_{command.name}", block=i + 10, section=5, label=label)
+            hud = maya2.HeadsUpDisplay.add(f"{PREFIX}_{action.name}", block=idx + 10, section=5, label=label)
 
             self._game_huds.append(hud)
 
@@ -291,28 +290,24 @@ class Game(QWidget):
         if x or y:
             self.grid.move(x, y)
 
-    def update_tetrimino_queue(self):
-        new_queue = TetriminoType.get_all().copy()
-        random.shuffle(new_queue)
+    def update_tetrimino_type_queue(self):
+        types = TetriminoType.get_all()
 
-        try:
-            self.tetrimino_type_queue.extend(new_queue)
-        except AttributeError:
-            self.tetrimino_type_queue = new_queue
+        if len(self._tetrimino_type_queue) <= len(types):
+            new_queue = random.sample(types, len(types))
+            self._tetrimino_type_queue.extend(new_queue)
+
+    @property
+    def tetrimino_type_queue(self) -> list[TetriminoType]:
+        return self._tetrimino_type_queue
 
     @property
     def time_step(self) -> float:
         """Value is in second."""
         return self._time_step
 
-    def update_time_step(self, level: int, multiplier: float = 0.66):
-        self._time_step = self.TIME_STEP * (multiplier**level)
-
-    def remove_empty_groups(self):
-        groups = mc.ls(f"{PREFIX}_*grp", exactType="transform")
-        for grp in groups:
-            if not mc.listRelatives(grp, children=True):
-                mc.delete(grp)
+    def update_time_step(self, multiplier: float = 0.66):
+        self._time_step = self.TIME_STEP * (multiplier**self._level)
 
     def get_score(self) -> int:
         """Should be used for ui only.
@@ -333,7 +328,7 @@ class Game(QWidget):
         """
         return self._lines
 
-    def get_level(self) -> int:
+    def get_ui_level(self) -> int:
         """Should be used for ui only.
 
         Returns:
@@ -345,7 +340,6 @@ class Game(QWidget):
     def update_level(self, line_count: int):
         self._lines += line_count
         self._level = self._lines // 10
-        self.update_time_step(self._level)
 
     def game_over(self):
         mc.confirmDialog(
@@ -354,7 +348,7 @@ class Game(QWidget):
             message=f"Game Over\n\n"
             f"Final Score: {self.get_score()}\n"
             f"Lines: {self.get_lines()}\n"
-            f"Final Level: {self.get_level()}",
+            f"Final Level: {self.get_ui_level()}",
         )
 
         self.clean_geo()
@@ -390,8 +384,7 @@ class Game(QWidget):
                 time.sleep(0.02)
 
     def init_loop(self):
-        if len(self.tetrimino_type_queue) < len(TetriminoType.get_all()):
-            self.update_tetrimino_queue()
+        self.update_tetrimino_type_queue()
 
         tetrimino_type = self.tetrimino_type_queue.pop(0)
         next_tetrimino = tetrimino_type.make(id=self._loop_counter)
@@ -423,8 +416,9 @@ class Game(QWidget):
 
         self.update_score(completed_rows)
         self.update_level(completed_rows)
+        self.update_time_step()
 
-        self.remove_empty_groups()
+        maya2.remove_empty_groups(f"{PREFIX}_*_grp")
 
         self.init_loop()
 

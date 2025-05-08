@@ -60,10 +60,9 @@ impl Tetrimino {
     fn new(
         r#type: TetriminoLetter,
         root: String,
-        cubes: [String; 4],
+        cubes: [Cube; 4],
         py: Python<'_>,
     ) -> Py<Tetrimino> {
-        let cubes = cubes.map(Cube::new);
         Py::new(
             py,
             Tetrimino {
@@ -72,7 +71,7 @@ impl Tetrimino {
                 cubes,
             },
         )
-        .unwrap()
+            .unwrap()
     }
 
     #[getter]

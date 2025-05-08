@@ -265,7 +265,7 @@ impl Grid {
 
         while row_idx < Self::ROW_COUNT {
             let current_row = &self.cells[row_idx];
-            let row_is_not_empty = current_row.iter().all(|c| c.is_some());
+            let row_is_not_empty = current_row.iter().any(|c| c.is_some());
 
             if row_is_not_empty {
                 let row_object_names: Vec<&str> = current_row

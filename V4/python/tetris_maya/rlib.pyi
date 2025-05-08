@@ -14,10 +14,18 @@ class Grid:
     JIGGLE_MOVES: list[int]
 
     def __new__(cls) -> Grid: ...
-    def move(self, x: int, y: int) -> bool: ...
-    def rotate(self, angle: Turn) -> bool: ...
-    def inplace_collision(self) -> bool: ...
-    def update_cells(self): ...
+    def move(self, x: int, y: int) -> bool:
+        """Move the active tetrimino"""
+
+    def rotate(self, angle: Turn) -> bool:
+        """Rotate the active tetrimino"""
+
+    def inplace_collision(self) -> bool:
+        """Check if the active tetrimino collides with another one"""
+
+    def update_cells(self):
+        """Store the active tetrimino cubes in the cell matrix. Should only be called in the post-loop."""
+
     def process_completed_rows(self) -> int:
         """Check the grid for completed rows. Delete them and move down the others if possible."""
 
@@ -27,7 +35,7 @@ class Grid:
     def active_tetrimino(self, tetrimino: Tetrimino) -> None: ...
 
 class Tetrimino:
-    def __new__(cls, type: TetriminoLetter, root: str, cubes: tuple[str, str, str, str]) -> Tetrimino: ...
+    def __new__(cls, type: TetriminoLetter, root: str, cubes: tuple[Cube, Cube, Cube, Cube]) -> Tetrimino: ...
     @property
     def root(self) -> str: ...
     @property
@@ -45,3 +53,11 @@ class TetriminoLetter(Enum):
 class Turn(Enum):
     Left = ...
     Right = ...
+
+class Cube:
+    def __new__(cls, name: str) -> Cube: ...
+    def move(self, x: int, y: int):
+        """Move the cube to the desired coordinates."""
+
+    @property
+    def name(self) -> str: ...
