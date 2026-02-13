@@ -212,6 +212,7 @@ class Grid():
             return Hold.CANT
 
     def update_cells(self, tetrimino: "Tetrimino"):
+        mc.refresh()
         for cube, (x, y) in zip(tetrimino.cubes, tetrimino.cube_positions):
             self._matrix[int(y)][int(x)] = cube
 
@@ -253,4 +254,5 @@ class Grid():
                 self._matrix[row_id - 1] = [None] * self.COLUMN_COUNT
             row_id += 1
 
+        mc.refresh()
         return moved_down
