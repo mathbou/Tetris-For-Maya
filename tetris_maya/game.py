@@ -40,8 +40,8 @@ class LoopWorker(QObject):
             if not self._isRunning:
                 break
             else:
-                self.step.emit()
                 time.sleep(self.__time_step)
+                self.step.emit()
 
         print(time.perf_counter()-start)
         self.finished.emit()
