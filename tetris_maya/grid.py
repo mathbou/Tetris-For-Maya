@@ -31,7 +31,7 @@ class Grid():
         self._make_square("Next", self.NEXT_POS)
         self._make_square("Hold", self.HOLD_POS)
 
-        self._matrix: List[List[Optional[str]]] = [[None] * self.COLUMN_COUNT] * self.ROW_COUNT
+        self._matrix: List[List[Optional[str]]] = [[None] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
 
         self.active_tetrimino: Optional["Tetrimino"] = None
         self._next_tetrimino: Optional["Tetrimino"] = None
