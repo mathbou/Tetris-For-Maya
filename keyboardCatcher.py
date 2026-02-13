@@ -37,8 +37,6 @@ class KeyLogger(Thread):
             # Stop listener
             return False
 
-        print self.action
-
     def close(self):
         print "Stopping keyboard catcher"
         self.human_press(keyboard.Key.end)
