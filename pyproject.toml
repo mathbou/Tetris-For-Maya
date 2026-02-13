@@ -10,7 +10,7 @@ python = "^3.7, <=3.9"
 pynput = {version = "*", optional = true } # only required in V2 for the keyboard catcher
 
 [tool.poetry.extras]
-v2 = ["pynput"]
+v-two = ["pynput"]
 
 [tool.poetry.dev-dependencies]
 PySide2 = "~5.15"
