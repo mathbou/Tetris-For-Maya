@@ -61,12 +61,12 @@ class Game(QWidget):
         self.grid = Grid()
 
         self._thread = QThread()
-        self._thread.finished.connect(self._thread.deleteLater)
 
         super().__init__(parent=get_main_window())
 
     def close(self) -> bool:
         self._thread.quit()
+        self._thread.deleteLater()
 
         self.parent().removeEventFilter(self)
 
