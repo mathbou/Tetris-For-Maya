@@ -1,10 +1,10 @@
 import math
 from enum import IntEnum
 from typing import ClassVar, List, Optional, Tuple
+from unittest.mock import patch
 
 import maya.cmds as mc
 from maya.app.type import typeToolSetup
-from unittest.mock import patch
 
 from .constants import PREFIX
 from .math2 import absmax, rotate_point
@@ -92,7 +92,7 @@ class Grid:
 
         type_node = mc.createNode("type", n="type#", skipSelect=True)
 
-        with patch('maya.app.type.typeToolSetup.IN_BATCH_MODE', True): # avoid AE to be shown after `type` creation
+        with patch("maya.app.type.typeToolSetup.IN_BATCH_MODE", True):  # avoid AE to be shown after `type` creation
             type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
 
         type_extrude_node = mc.listConnections(type_node, type="typeExtrude")[0]
