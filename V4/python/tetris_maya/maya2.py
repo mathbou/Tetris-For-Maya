@@ -66,3 +66,10 @@ class HeadsUpDisplay:
 
     def remove(self):
         mc.headsUpDisplay(self._name, remove=True)
+
+
+def remove_empty_groups(pattern: str):
+    groups = mc.ls(pattern, exactType="transform")
+    for grp in groups:
+        if not mc.listRelatives(grp, children=True):
+            mc.delete(grp)
