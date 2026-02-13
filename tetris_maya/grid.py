@@ -264,17 +264,16 @@ class Grid():
 
         row_id = from_row + 1
         while row_id < self.ROW_COUNT:
-            # descend d une case la lignes superieur si non vide
             row = list(filter(None, self._matrix[row_id]))
+
             if row:
                 mc.move(0, -1, 0, row, relative=1)
 
-                # actualisation des matrices
-                self._matrix[row_id - 1] = self._matrix[row_id].copy()
+                self._matrix[row_id - 1] = self._matrix[row_id].copy() # update matrix with the moved down row
                 moved_down = True
 
             else:
-                self._matrix[row_id - 1] = [None] * self.COLUMN_COUNT
+                self._matrix[row_id - 1] = [None] * self.COLUMN_COUNT # update matrix with an empty row
             row_id += 1
 
         mc.refresh()
