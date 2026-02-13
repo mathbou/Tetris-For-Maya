@@ -100,7 +100,7 @@ class Grid():
 
     def cell_occupied(self, x: int, y: int, whitelist: List[str] = None) -> bool:
         whitelist = whitelist or []
-        cell = self._matrix[int(y)][int(x)]
+        cell = self._matrix[y][x]
         return cell and cell not in whitelist
 
     def can_move_to(self, tetrimino: Tetrimino, x: int, y: int) -> bool:
@@ -112,7 +112,7 @@ class Grid():
             y: offset applied to the tetrimino
         """
         for cx, cy in tetrimino.cube_positions:
-            rx, ry = (cx + x, cy + y)
+            rx, ry = map(int, (cx + x, cy + y))
 
             if not self.inside_grid(rx, ry):
                 return False
@@ -144,7 +144,7 @@ class Grid():
         offset_x, offset_y = 0, 0
 
         for cx, cy in tetrimino.cube_positions:
-            rx, ry = rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y))
+            rx, ry = map(int, rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y)))
 
             if self.cell_occupied(rx, ry, tetrimino.cubes):
                 return False
