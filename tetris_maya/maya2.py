@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 import maya.cmds as mc
 from maya import OpenMayaUI as omui  # noqa: N813
@@ -30,15 +31,15 @@ def hud_countdown(msg: str, sec: int = 3):
         time.sleep(1)
 
 
-class headsUpDisplay():
-    def __init__(self, name:str):
+class HeadsUpDisplay:
+    def __init__(self, name: str):
         self._name = name
 
     @classmethod
-    def add(cls, name: str, block: int, section: int, **kwargs):
-        mc.headsUpDisplay(name, block=block, section=section, **kwargs)
+    def add(cls, name: str, block: int, section: int, **kwargs: Any):
+        mc.HeadsUpDisplay(name, block=block, section=section, **kwargs)
 
         return cls(name)
 
     def remove(self):
-        mc.headsUpDisplay(self._name, remove=True)
+        mc.HeadsUpDisplay(self._name, remove=True)
