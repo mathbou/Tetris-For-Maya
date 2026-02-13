@@ -476,7 +476,7 @@ class Tetris(object):
                 if next_level >= 10:
                     next_level -= 10
                     self.level += 1
-                    time_step = time_step * 0.75
+                    time_step = time_step * 0.5
 
                 #  update hud
                 self.clean_hud()
