@@ -23,8 +23,8 @@ class Grid():
     LEFT: ClassVar[int] = 0
     RIGHT: ClassVar[int] = COLUMN_COUNT - 1
 
-    NEXT_POS: ClassVar[Tuple[float, float, float]] = (8.5, 15, -1)
-    HOLD_POS: ClassVar[Tuple[float, float, float]] = (-7.5, 15, -1)
+    NEXT_POS: ClassVar[Tuple[float, float, float]] = (12.5, 15, -1)
+    HOLD_POS: ClassVar[Tuple[float, float, float]] = (-3.5, 15, -1)
 
     def __init__(self):
         self._make_background()
