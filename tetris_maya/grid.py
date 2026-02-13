@@ -98,10 +98,25 @@ class Grid():
 
         return vertically_inside and horizontally_inside
 
-    def cell_occupied(self, x: int, y: int, whitelist: List[str] = None) -> bool:
-        whitelist = whitelist or []
+    def cell_is_available(self, x: int, y: int, whitelist: List[str] = None) -> bool:
+        whitelist = whitelist.copy() or []
+        whitelist.append(None)
+
         cell = self._matrix[y][x]
-        return cell and cell not in whitelist
+
+        return cell in whitelist
+
+    def cells_are_available(self, positions: List[Tuple[int, int]], whitelist: Tuple[str, ...] = None, offset_x: int = 0, offset_y: int = 0) -> bool:
+        for (x, y) in positions:
+            ox, oy = map(int, (x + offset_x, y + offset_y))
+
+            if not self.inside_grid(ox, oy):
+                return False
+
+            elif not self.cell_is_available(ox, oy, whitelist=whitelist):
+                return False
+
+        return True
 
     def can_move_to(self, tetrimino: Tetrimino, x: int, y: int) -> bool:
         """
@@ -111,16 +126,7 @@ class Grid():
             x: offset applied to the tetrimino
             y: offset applied to the tetrimino
         """
-        for cx, cy in tetrimino.cube_positions:
-            rx, ry = map(int, (cx + x, cy + y))
-
-            if not self.inside_grid(rx, ry):
-                return False
-
-            elif self.cell_occupied(rx, ry, whitelist=tetrimino.cubes):
-                return False
-
-        return True
+        return self.cells_are_available(tetrimino.cube_positions, whitelist=tetrimino.cubes, offset_x=x, offset_y=y)
 
     def inplace_collision(self, tetrimino: Tetrimino) -> bool:
         return not self.can_move_to(tetrimino, 0, 0)
@@ -143,11 +149,9 @@ class Grid():
 
         offset_x, offset_y = 0, 0
 
+        # ------ COMPUTE ------
         for cx, cy in tetrimino.cube_positions:
             rx, ry = map(round, rotate_point(point=(cx, cy), angle=math.radians(angle), origin=(origin_x, origin_y)))
-
-            if self.cell_occupied(rx, ry, tetrimino.cubes):
-                return False
 
             if not self.inside_grid(rx, ry):
                 item_ox = max(0, min(rx, self.RIGHT)) - rx
@@ -158,6 +162,16 @@ class Grid():
 
             new_cube_pos.append((rx, ry))
 
+        # ------ CHECK ------
+        if not self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=offset_x, offset_y=offset_y):
+            for ox in (-1, 1, -2, 2): # check if left or right move is possible
+                if self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=offset_x + ox, offset_y=offset_y):
+                    offset_x += ox
+                    break
+            else:
+                return False
+
+        # ------ APPLY ------
         for cube, (x, y) in zip(tetrimino.cubes, new_cube_pos):
             mc.move(x, y, 0, cube, worldSpace=True, absolute=True)
 
