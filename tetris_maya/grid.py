@@ -72,13 +72,18 @@ class Grid():
 
         # --------- Square title ---------
 
-        label = typeToolSetup.createTypeTool(text=text)
-        mc.setAttr(f"{label}.enableExtrusion", False)
-        mc.setAttr(f"{label}.alignementMode", 2)  # center
-        mc.setAttr(f"{label}.fontSize", 1.125)
+        type_node = mc.createNode('type', n='type#', skipSelect=True)
+        type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
+        type_extrude_node = mc.listConnections(type_node, type="typeExtrude")[0]
 
-        mc.move(*position, label, absolute=True)
-        mc.move(0, 3, 0, label, relative=True)
+        mc.setAttr(f"{type_extrude_node}.enableExtrusion", False)
+        mc.setAttr(f"{type_node}.alignmentMode", 2)  # center
+        mc.setAttr(f"{type_node}.fontSize", 1.125)
+
+        type_transform = mc.listConnections(type_node, type="transform")[0]
+        mc.move(*position, type_transform, absolute=True)
+        mc.move(0, 3, 0, type_transform, relative=True)
+        mc.rename(type_transform, f"{PREFIX}_{type_transform}")
 
     # --------------- CHECKERS ---------------
 
