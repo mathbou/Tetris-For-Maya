@@ -57,7 +57,7 @@ tetris_maya.install_shelf()
 
 They're here mostly for curiosity purpose and to see my evolution along the years.
 
-### V1
+### V1 🚲
 
 This is the original version I made for a school project, back in 2016. 
 The only instruction given by my teacher was "Entertain me.". I just started python very recently at the time, 
@@ -70,7 +70,7 @@ Due to technical limitations, it runs only on **Maya 2016 or lower**.
 This is due to major changes in the 2017 version, when Autodesk upgrades from Qt4 to Qt5. 
 On old Maya versions, even if a code loop was running, we were still able to catch hotkey without any additional thread.
 
-### V2
+### V2 🏎️
 
 This version is almost a complete rewrite, made in 2018.
 The primary goal of this one was to make it playable on **Maya 2017-2020**. 
@@ -82,7 +82,7 @@ Obviously, this was a big drawback, as now it needed a dependency to run correct
 I also made a demo of this version:
 [![](https://i.vimeocdn.com/video/690160903-08e3d87193b5eb570c2c877c1ef455a92e5eafcbd4e90138c4c6957e1db628ee-d)](https://vimeo.com/261212280)
 
-### tetris_maya (V3)
+### tetris_maya (V3) 🚀
 
 And again, another big rewrite. But why go back on this project after another 4 years ? Well, there are three reasons:
 
