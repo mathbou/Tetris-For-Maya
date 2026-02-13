@@ -495,7 +495,7 @@ checksum = "e502f78cdbb8ba4718f566c418c52bc729126ffd16baee5baa718cf25dd5a69a"
 
 [[package]]
 name = "tetris-maya"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "num-traits",
  "pyo3",
