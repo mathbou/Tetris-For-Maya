@@ -216,7 +216,7 @@ class Game(QWidget):
         return self._score
 
     def update_score(self, rows: int):
-        self._score += SCORE_TABLE.get(rows)
+        self._score += SCORE_TABLE.get(rows, 0)
 
     def get_lines(self) -> int:
         return self._lines
