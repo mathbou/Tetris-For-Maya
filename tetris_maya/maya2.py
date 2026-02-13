@@ -56,9 +56,9 @@ class HeadsUpDisplay:
 
     @classmethod
     def add(cls, name: str, block: int, section: int, **kwargs: Any):
-        mc.HeadsUpDisplay(name, block=block, section=section, **kwargs)
+        mc.headsUpDisplay(name, block=block, section=section, **kwargs)
 
         return cls(name)
 
     def remove(self):
-        mc.HeadsUpDisplay(self._name, remove=True)
+        mc.headsUpDisplay(self._name, remove=True)
