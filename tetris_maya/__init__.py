@@ -5,7 +5,6 @@ def launch_game():
     Game.start()
 
 
-# TODO bug de queue, ne respecte pas la règle des 7
 # TODO bug de rotation quand collé a gauche
 # TODO bug de rotation quand collé en haut
 # TODO bug pas de score sur le harddrop
