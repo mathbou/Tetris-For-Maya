@@ -44,7 +44,7 @@ class TetriminoType:
         return cls._types
 
     def make(self, id: int) -> Tetrimino:
-        return tetrimino_maker(self.cubes, self.color, f"{self.name}{id}")
+        return tetrimino_maker(self, id)
 
 
 T = TetriminoType(name="T", cubes=((0, 0), (1, 0), (-1, 0), (0, -1)), color=(0.23, 0.0, 0.27))
@@ -56,9 +56,9 @@ S = TetriminoType(name="S", cubes=((0, 0), (0, -1), (1, 0), (-1, -1)), color=(0.
 I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0.5, 1))
 
 
-def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]],
-                    color: Tuple[float, float, float],
-                    name: str) -> Tetrimino:
+def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:
+
+    name = f"{t_type.name}{id}"
 
     tetrimino_cubes = []
 
@@ -74,12 +74,12 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
                   constructionHistory=False, offset=0.1, offsetAsFraction=False,
                   worldSpace=True,
                   angleTolerance=30)
-    mc.polyColorPerVertex(rgb=color, colorDisplayOption=True, notUndoable=True)
-    mc.move(*cubes[0], 0, tetrimino_cube, absolute=True)
+    mc.polyColorPerVertex(rgb=t_type.color, colorDisplayOption=True, notUndoable=True)
+    mc.move(*t_type.cubes[0], 0, tetrimino_cube, absolute=True)
 
     tetrimino_cubes.append(tetrimino_cube)
 
-    for tx, ty in cubes[1:]:
+    for tx, ty in t_type.cubes[1:]:
         duplicate_cube = mc.duplicate(tetrimino_cube, instanceLeaf=True)[0]
         mc.move(tx, ty, 0, duplicate_cube, absolute=True)
         tetrimino_cubes.append(duplicate_cube)
@@ -91,7 +91,7 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
 
     mc.select(clear=True)
 
-    return Tetrimino(type=name, root=group, cubes=cubes)
+    return Tetrimino(type=t_type.name, root=group, cubes=cubes)
 
 
 
