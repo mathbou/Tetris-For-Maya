@@ -1,15 +1,13 @@
 import math
 from enum import IntEnum
-from typing import TYPE_CHECKING, ClassVar, Optional, Tuple, List
+from typing import ClassVar, Optional, Tuple, List
 
 import maya.cmds as mc
 from maya.app.type import typeToolSetup
 
 from .constants import PREFIX
 from .math2 import rotate_point, absmax
-
-if TYPE_CHECKING:
-    from .tetrimino import Tetrimino
+from .tetrimino import O, Tetrimino
 
 
 __all__ = ["Grid", "Hold"]
@@ -41,10 +39,10 @@ class Grid():
 
         self._matrix: List[List[Optional[str]]] = [[None] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
 
-        self.active_tetrimino: Optional["Tetrimino"] = None
-        self._next_tetrimino: Optional["Tetrimino"] = None
+        self.active_tetrimino: Optional[Tetrimino] = None
+        self._next_tetrimino: Optional[Tetrimino] = None
 
-        self._hold_tetrimino: Optional["Tetrimino"] = None
+        self._hold_tetrimino: Optional[Tetrimino] = None
         self._can_hold: bool = True
 
     @classmethod
@@ -105,7 +103,7 @@ class Grid():
         cell = self._matrix[int(y)][int(x)]
         return cell and cell not in whitelist
 
-    def can_move_to(self, tetrimino: "Tetrimino", x: int, y: int) -> bool:
+    def can_move_to(self, tetrimino: Tetrimino, x: int, y: int) -> bool:
         """
 
         Args:
@@ -124,19 +122,22 @@ class Grid():
 
         return True
 
-    def inplace_collision(self, tetrimino: "Tetrimino") -> bool:
+    def inplace_collision(self, tetrimino: Tetrimino) -> bool:
         return not self.can_move_to(tetrimino, 0, 0)
 
     # --------------- ACTIONS ---------------
 
-    def move(self, tetrimino: "Tetrimino", x: int, y: int) -> bool:
+    def move(self, tetrimino: Tetrimino, x: int, y: int) -> bool:
         if self.can_move_to(tetrimino, x, y):
             mc.move(x, y, 0, tetrimino.root, relative=1)
             mc.refresh()
             return True
         return False
 
-    def rotate(self, tetrimino: "Tetrimino", angle: int = -90) -> bool:
+    def rotate(self, tetrimino: Tetrimino, angle: int = -90) -> bool:
+        if tetrimino.type == O.name:
+            return False
+
         origin_x, origin_y = tetrimino.position
         new_cube_pos: List[Tuple[int, int]] = []
 
@@ -165,16 +166,16 @@ class Grid():
 
         return True
 
-    def _move_to_start(self, tetrimino: "Tetrimino"):
+    def _move_to_start(self, tetrimino: Tetrimino):
         mc.move(self.COLUMN_COUNT/2 - 1, self.TOP, 0, tetrimino.root, absolute=True)
         mc.scale(1, 1, 1, tetrimino.root, absolute=True)
 
-    def _move_to_next(self, tetrimino: "Tetrimino"):
+    def _move_to_next(self, tetrimino: Tetrimino):
         translation = [h - t for t, h in zip(mc.objectCenter(tetrimino.root), self.NEXT_POS)]
         mc.move(*translation, tetrimino.root, absolute=True)
         mc.scale(0.85, 0.85, 0.85, tetrimino.root, absolute=True)
 
-    def put_to_next(self, tetrimino: "Tetrimino"):
+    def put_to_next(self, tetrimino: Tetrimino):
         if self._next_tetrimino:
             self.active_tetrimino = self._next_tetrimino
             self._move_to_start(self.active_tetrimino)
@@ -183,7 +184,7 @@ class Grid():
         self._move_to_next(self._next_tetrimino)
         mc.refresh()
 
-    def _move_to_hold(self, tetrimino: "Tetrimino"):
+    def _move_to_hold(self, tetrimino: Tetrimino):
         local_center = [c - p  for c, p in zip(mc.objectCenter(tetrimino.root), tetrimino.position)]
         translation = [h - c  for h, c in zip(self.HOLD_POS, local_center)]
         mc.move(*translation, tetrimino.root, absolute=True)
@@ -211,7 +212,7 @@ class Grid():
         else:
             return Hold.CANT
 
-    def update_cells(self, tetrimino: "Tetrimino"):
+    def update_cells(self, tetrimino: Tetrimino):
         mc.refresh()
         for cube, (x, y) in zip(tetrimino.cubes, tetrimino.cube_positions):
             self._matrix[int(y)][int(x)] = cube
