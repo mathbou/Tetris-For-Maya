@@ -232,26 +232,34 @@ class Grid():
             self._matrix[int(y)][int(x)] = cube
 
     def process_completed_rows(self) -> int:
+        """Check the grid for completed rows. Delete them and move down the others if possible."""
         row_id = 0
         completed_rows = 0
 
         while row_id < self.ROW_COUNT:
             row = list(filter(None, self._matrix[row_id]))
-            # check si la ligne est complete
-            if len(row) == self.COLUMN_COUNT:
+            row_is_complete = len(row) == self.COLUMN_COUNT
+
+            if row_is_complete:
                 completed_rows += 1
-                mc.delete(row)  # delete la ligne complete
+                mc.delete(row)
 
-                moved_down = self.remove_empty_rows(from_row=row_id)
+                moved_down = self._move_down_rows(from_row=row_id)
 
-                # fait revenir le scan a l index precedant si des blocs ont ete descendus
+                # must roll back on previous index if cubes were moved down
                 row_id = row_id - int(moved_down)
 
             row_id += 1
 
         return completed_rows
 
-    def remove_empty_rows(self, from_row: int):
+    def _move_down_rows(self, from_row: int):
+        """Move down rows and update grid data.
+
+        Warnings:
+            Does not check if `from_row` is an empty row.
+
+        """
         moved_down = False
 
         row_id = from_row + 1

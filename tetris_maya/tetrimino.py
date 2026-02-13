@@ -36,7 +36,7 @@ class TetriminoType:
     _types: ClassVar[List["TetriminoType"]] = field(default=[], init=False)
 
     def __post_init__(self):
-        # Register type
+        # Register tetrimino type
         self._types.append(self)
 
     @classmethod
@@ -57,7 +57,6 @@ I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0
 
 
 def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:
-
     name = f"{t_type.name}{id}"
 
     tetrimino_cubes = []
