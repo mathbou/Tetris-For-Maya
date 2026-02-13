@@ -195,7 +195,7 @@ class Game(QWidget):
 
         try:
             self.tetrimino_type_queue.extend(new_queue)
-        except NameError:
+        except AttributeError:
             self.tetrimino_type_queue = new_queue
 
     @property
