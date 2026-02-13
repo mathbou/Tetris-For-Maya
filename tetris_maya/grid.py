@@ -99,7 +99,7 @@ class Grid():
         return vertically_inside and horizontally_inside
 
     def cell_is_available(self, x: int, y: int, whitelist: List[str] = None) -> bool:
-        whitelist = whitelist.copy() or []
+        whitelist = list(whitelist) or []
         whitelist.append(None)
 
         cell = self._matrix[y][x]
