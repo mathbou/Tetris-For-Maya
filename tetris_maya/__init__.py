@@ -14,5 +14,5 @@ Warnings:
 from .game import Game
 
 
-def launch_game():
+def launch():
     Game.start()
