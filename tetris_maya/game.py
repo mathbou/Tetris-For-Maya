@@ -181,6 +181,7 @@ class Game(QWidget):
         elif value == Action.HARDD:
             while self.grid.move(self.grid.active_tetrimino, 0, -1):
                 pass
+            self._score += 20
             self.loop_worker.stop()
 
         elif value == Action.HOLD:
