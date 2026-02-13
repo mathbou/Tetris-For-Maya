@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -19,6 +19,7 @@
 #
 import ctypes
 import platform
+import sys
 from contextlib import contextmanager
 
 __all__ = ["timer_precision"]
@@ -33,7 +34,7 @@ def timer_precision(ms: int = 1):
     """
     is_win = platform.system() == "Windows"
 
-    if is_win:
+    if is_win and sys.version_info < (3, 11):
         winmm = ctypes.WinDLL("winmm")
         winmm.timeBeginPeriod(ms)
 

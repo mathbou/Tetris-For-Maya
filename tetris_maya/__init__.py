@@ -3,10 +3,10 @@
 # Version : 3.0.0
 #
 # Warnings:
-#     Only work on Maya 2022+
+#     Works on Maya 2022+
 #
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).

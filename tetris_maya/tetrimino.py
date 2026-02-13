@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -17,29 +17,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import ClassVar, List, Tuple
+from typing import ClassVar
 
 import maya.cmds as mc
 
 from .constants import PREFIX
 
-__all__ = ["TetriminoType", "Tetrimino"]
+__all__ = ["Tetrimino", "TetriminoType"]
 
 
 @dataclass(frozen=True)
 class Tetrimino:
-    type: str  # noqa: A003
+    type: str
     root: str
-    cubes: Tuple[str, str, str, str]
+    cubes: tuple[str, str, str, str]
 
     @property
-    def position(self) -> Tuple[float, float]:
+    def position(self) -> tuple[float, float]:
         """Get (x, y) world position of the root group"""
         return mc.xform(self.root, query=True, worldSpace=True, translation=True)[:2]
 
     @property
-    def cube_positions(self) -> List[Tuple[float, float]]:
+    def cube_positions(self) -> list[tuple[float, float]]:
         """Get (x, y) world positions for each cube"""
         return [mc.xform(cube, query=True, worldSpace=True, translation=True)[:2] for cube in self.cubes]
 
@@ -47,32 +49,32 @@ class Tetrimino:
 @dataclass(frozen=True)
 class TetriminoType:
     name: str
-    cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]]
-    color: Tuple[float, float, float]
-    _types: ClassVar[List["TetriminoType"]] = field(default=[], init=False)
+    cubes: tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]
+    color: tuple[float, float, float]
+    _types: ClassVar[list[TetriminoType]] = field(default=[], init=False)
 
     def __post_init__(self):
         # Register tetrimino type
         self._types.append(self)
 
     @classmethod
-    def get_all(cls) -> List["TetriminoType"]:
+    def get_all(cls) -> list[TetriminoType]:
         return cls._types
 
-    def make(self, id: int) -> Tetrimino:  # noqa: A002
+    def make(self, id: int) -> Tetrimino:
         return tetrimino_maker(self, id)
 
 
 T = TetriminoType(name="T", cubes=((0, 0), (1, 0), (-1, 0), (0, -1)), color=(0.23, 0.0, 0.27))
-O = TetriminoType(name="O", cubes=((0, 0), (0, -1), (1, 0), (1, -1)), color=(0.7, 0.65, 0.02))  # noqa: E741
+O = TetriminoType(name="O", cubes=((0, 0), (0, -1), (1, 0), (1, -1)), color=(0.7, 0.65, 0.02))
 L = TetriminoType(name="L", cubes=((0, 0), (-1, -1), (1, 0), (-1, 0)), color=(0.75, 0.25, 0))
 J = TetriminoType(name="J", cubes=((0, 0), (1, -1), (1, 0), (-1, 0)), color=(0.02, 0.02, 0.65))
 Z = TetriminoType(name="Z", cubes=((0, 0), (0, -1), (-1, 0), (1, -1)), color=(0.65, 0.02, 0.02))
 S = TetriminoType(name="S", cubes=((0, 0), (0, -1), (1, 0), (-1, -1)), color=(0.02, 0.65, 0.02))
-I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0.5, 1))  # noqa: E741
+I = TetriminoType(name="I", cubes=((0, 0), (-1, 0), (1, 0), (2, 0)), color=(0, 0.5, 1))
 
 
-def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:  # noqa: A002
+def tetrimino_maker(t_type: TetriminoType, id: int = 0) -> Tetrimino:
     name = f"{t_type.name}{id}"
 
     tetrimino_cubes = []

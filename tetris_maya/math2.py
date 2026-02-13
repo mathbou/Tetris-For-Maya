@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import math
-from typing import Tuple
 
-__all__ = ["rotate_point", "absmax"]
+__all__ = ["absmax", "rotate_point"]
 
 
-def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, float] = (0, 0)) -> Tuple[float, float]:
+def rotate_point(point: tuple[float, float], angle: float, origin: tuple[float, float] = (0, 0)) -> tuple[float, float]:
     """2D rotation on XY plane
 
     Args:
@@ -31,6 +32,8 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
         point:
         angle: Radians
 
+    Returns:
+        New (x, y) position after rotation.
     """
     ox, oy = origin
     px, py = point
@@ -44,6 +47,9 @@ def rotate_point(point: Tuple[float, float], angle: float, origin: Tuple[float, 
 def absmax(a: float, b: float) -> float:
     """Get the absolute highest number.
 
+    Returns:
+        Absolute highest number.
+
     Examples:
         >>> absmax(-3, 2)
         -3
@@ -54,5 +60,4 @@ def absmax(a: float, b: float) -> float:
     """
     if abs(a) > abs(b):
         return a
-    else:
-        return b
+    return b

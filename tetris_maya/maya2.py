@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Mathieu Bouzard.
+# Copyright (c) 2025 Mathieu Bouzard.
 #
 # This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
@@ -21,15 +21,20 @@ import time
 from typing import Any
 
 import maya.cmds as mc
-from maya import OpenMayaUI as omui  # noqa: N813
-from PySide2.QtWidgets import QMainWindow
-from shiboken2 import wrapInstance
+from maya import OpenMayaUI as OpenMayaUI
+
+try:
+    from PySide2.QtWidgets import QMainWindow
+    from shiboken2 import wrapInstance
+except ImportError:
+    from PySide6.QtWidgets import QMainWindow
+    from shiboken6 import wrapInstance
 
 __all__ = ["get_main_window", "hud_countdown"]
 
 
 def get_main_window() -> QMainWindow:
-    maya_main_window_ptr = omui.MQtUtil.mainWindow()
+    maya_main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
 
     ptr = int(maya_main_window_ptr)
 
@@ -46,7 +51,7 @@ def hud_countdown(msg: str, sec: int = 3):
         raise ValueError("Countdown can't be negative")
 
     for i in range(sec):
-        mc.headsUpMessage("{}: {}".format(msg, sec - i), time=1)
+        mc.headsUpMessage(f"{msg}: {sec - i}", time=1)
         time.sleep(1)
 
 
