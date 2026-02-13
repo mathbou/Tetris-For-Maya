@@ -30,6 +30,7 @@ class Grid():
         self._make_background()
         self._make_square("Next", self.NEXT_POS)
         self._make_square("Hold", self.HOLD_POS)
+        mc.refresh()
 
         self._matrix: List[List[Optional[str]]] = [[None] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
 
@@ -90,7 +91,6 @@ class Grid():
     def cell_occupied(self, x: int, y: int, whitelist: List[str] = None) -> bool:
         whitelist = whitelist or []
         cell = self._matrix[int(y)][int(x)]
-
         return cell and cell not in whitelist
 
     def can_move_to(self, tetrimino: "Tetrimino", x: int, y: int) -> bool:
@@ -120,6 +120,7 @@ class Grid():
     def move(self, tetrimino: "Tetrimino", x: int, y: int) -> bool:
         if self.can_move_to(tetrimino, x, y):
             mc.move(x, y, 0, tetrimino.root, relative=1)
+            mc.refresh()
             return True
         return False
 
@@ -148,6 +149,7 @@ class Grid():
             mc.move(x, y, 0, cube, worldSpace=True, absolute=True)
 
         mc.move(offset_x, offset_y, 0, tetrimino.root, relative=True)
+        mc.refresh()
 
         return True
 
@@ -167,6 +169,7 @@ class Grid():
 
         self._next_tetrimino = tetrimino
         self._move_to_next(self._next_tetrimino)
+        mc.refresh()
 
     def _move_to_hold(self, tetrimino: "Tetrimino"):
         translation = [h - t for t, h in zip(mc.objectCenter(tetrimino.root), self.HOLD_POS)]
@@ -187,6 +190,7 @@ class Grid():
             self._hold_tetrimino = backup
             self._can_hold = False
             self._move_to_hold(self._hold_tetrimino)
+            mc.refresh()
 
     def update_cells(self, tetrimino: "Tetrimino"):
         for cube, (x, y) in zip(tetrimino.cubes, tetrimino.cube_positions):
