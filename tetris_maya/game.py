@@ -57,6 +57,7 @@ class Game(QWidget):
         self._lines = 0
         self._loop_counter = 0
         self.update_time_step(self._level)
+        self.update_tetrimino_queue()
 
         self.grid = Grid()
 
