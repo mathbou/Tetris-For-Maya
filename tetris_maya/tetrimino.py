@@ -61,7 +61,7 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
                     name: str) -> Tetrimino:
     tetrimino_cubes = []
 
-    for i, (tx, ty, tz) in enumerate(cubes):
+    for i, (tx, ty) in enumerate(cubes):
         tetrimino_cube = mc.polyCube(
             width=1, height=1, depth=1,
             subdivisionsX=1, subdivisionsY=1, subdivisionsZ=1,
@@ -76,7 +76,7 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
                       angleTolerance=30)
         mc.polyColorPerVertex(rgb=color, colorDisplayOption=True, notUndoable=True)
 
-        mc.move(tx, ty, tz, tetrimino_cube, absolute=True)
+        mc.move(tx, ty, 0, tetrimino_cube, absolute=True)
         tetrimino_cubes.append(tetrimino_cube)
 
     group = mc.group(tetrimino_cubes, name=f"{PREFIX}_tetrimino{name}")
