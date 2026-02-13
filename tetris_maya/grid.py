@@ -1,14 +1,13 @@
 import math
 from enum import IntEnum
-from typing import ClassVar, Optional, Tuple, List
+from typing import ClassVar, List, Optional, Tuple
 
 import maya.cmds as mc
 from maya.app.type import typeToolSetup
 
 from .constants import PREFIX
-from .math2 import rotate_point, absmax
+from .math2 import absmax, rotate_point
 from .tetrimino import O, Tetrimino
-
 
 __all__ = ["Grid", "Hold"]
 
@@ -19,7 +18,7 @@ class Hold(IntEnum):
     SWAP = 2
 
 
-class Grid():
+class Grid:
     ROW_COUNT: ClassVar[int] = 20
     COLUMN_COUNT: ClassVar[int] = 10
 
@@ -50,34 +49,47 @@ class Grid():
         bg_group = mc.group(name=f"{PREFIX}_background_grp", empty=1)
         for x in range(cls.COLUMN_COUNT):
             for y in range(cls.ROW_COUNT):
-                bg_cube = mc.polyCube(width=1, height=1, depth=1,
-                                      subdivisionsX=1, subdivisionsY=1, subdivisionsZ=1,
-                                      createUVs=False,
-                                      constructionHistory=False,
-                                      name=f"{PREFIX}_background{x:02}{y:02}_geo")[0]
-                mc.polyBevel3(f"{bg_cube}.e[0:11]", segments=1,
-                              constructionHistory=False,
-                              offset=0.05,
-                              offsetAsFraction=False,
-                              worldSpace=True,
-                              angleTolerance=30)
+                bg_cube = mc.polyCube(
+                    width=1,
+                    height=1,
+                    depth=1,
+                    subdivisionsX=1,
+                    subdivisionsY=1,
+                    subdivisionsZ=1,
+                    createUVs=False,
+                    constructionHistory=False,
+                    name=f"{PREFIX}_background{x:02}{y:02}_geo",
+                )[0]
+                mc.polyBevel3(
+                    f"{bg_cube}.e[0:11]",
+                    segments=1,
+                    constructionHistory=False,
+                    offset=0.05,
+                    offsetAsFraction=False,
+                    worldSpace=True,
+                    angleTolerance=30,
+                )
                 mc.move(x, y, -1, bg_cube, absolute=1)
                 mc.parent(bg_cube, bg_group)
 
     @classmethod
     def _make_square(cls, text: str, position: Tuple[float, float, float]):
-        square = mc.polyTorus(radius=3.2,
-                              sectionRadius=0.3, twist=0,
-                              subdivisionsX=4,
-                              subdivisionsY=3, createUVs=False,
-                              constructionHistory=False,
-                              name=f"{PREFIX}_square_geo")
+        square = mc.polyTorus(
+            radius=3.2,
+            sectionRadius=0.3,
+            twist=0,
+            subdivisionsX=4,
+            subdivisionsY=3,
+            createUVs=False,
+            constructionHistory=False,
+            name=f"{PREFIX}_square_geo",
+        )
         mc.move(*position, square, absolute=True)
         mc.rotate("90deg", 0, "-45deg", square, absolute=True)
 
         # --------- Square title ---------
 
-        type_node = mc.createNode('type', n='type#', skipSelect=True)
+        type_node = mc.createNode("type", n="type#", skipSelect=True)
         type_node = typeToolSetup.createTypeToolWithNode(type_node, text=text)
         type_extrude_node = mc.listConnections(type_node, type="typeExtrude")[0]
 
@@ -106,7 +118,9 @@ class Grid():
 
         return cell in whitelist
 
-    def cells_are_available(self, positions: List[Tuple[int, int]], whitelist: Tuple[str, ...] = None, offset_x: int = 0, offset_y: int = 0) -> bool:
+    def cells_are_available(
+        self, positions: List[Tuple[int, int]], whitelist: Tuple[str, ...] = None, offset_x: int = 0, offset_y: int = 0
+    ) -> bool:
         for (x, y) in positions:
             ox, oy = map(int, (x + offset_x, y + offset_y))
 
@@ -119,7 +133,7 @@ class Grid():
         return True
 
     def can_move_to(self, tetrimino: Tetrimino, x: int, y: int) -> bool:
-        """
+        """.
 
         Args:
             tetrimino:
@@ -163,9 +177,13 @@ class Grid():
             new_cube_pos.append((rx, ry))
 
         # ------ CHECK ------
-        if not self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=global_offset_x, offset_y=global_offset_y):
-            for ox in (-1, 1, -2, 2): # check if left or right move is possible
-                if self.cells_are_available(new_cube_pos, tetrimino.cubes, offset_x=global_offset_x + ox, offset_y=global_offset_y):
+        if not self.cells_are_available(
+            new_cube_pos, tetrimino.cubes, offset_x=global_offset_x, offset_y=global_offset_y
+        ):
+            for ox in (-1, 1, -2, 2):  # check if left or right move is possible
+                if self.cells_are_available(
+                    new_cube_pos, tetrimino.cubes, offset_x=global_offset_x + ox, offset_y=global_offset_y
+                ):
                     global_offset_x += ox
                     break
             else:
@@ -181,7 +199,7 @@ class Grid():
         return True
 
     def _move_to_start(self, tetrimino: Tetrimino):
-        mc.move(self.COLUMN_COUNT/2 - 1, self.TOP, 0, tetrimino.root, absolute=True)
+        mc.move(self.COLUMN_COUNT / 2 - 1, self.TOP, 0, tetrimino.root, absolute=True)
         mc.scale(1, 1, 1, tetrimino.root, absolute=True)
 
     def _move_to_next(self, tetrimino: Tetrimino):
@@ -199,8 +217,8 @@ class Grid():
         mc.refresh()
 
     def _move_to_hold(self, tetrimino: Tetrimino):
-        local_center = [c - p  for c, p in zip(mc.objectCenter(tetrimino.root), tetrimino.position)]
-        translation = [h - c  for h, c in zip(self.HOLD_POS, local_center)]
+        local_center = [c - p for c, p in zip(mc.objectCenter(tetrimino.root), tetrimino.position)]
+        translation = [h - c for h, c in zip(self.HOLD_POS, local_center)]
         mc.move(*translation, tetrimino.root, absolute=True)
         mc.scale(0.85, 0.85, 0.85, tetrimino.root, absolute=True)
 
@@ -269,11 +287,11 @@ class Grid():
             if row:
                 mc.move(0, -1, 0, row, relative=1)
 
-                self._matrix[row_id - 1] = self._matrix[row_id].copy() # update matrix with the moved down row
+                self._matrix[row_id - 1] = self._matrix[row_id].copy()  # update matrix with the moved down row
                 moved_down = True
 
             else:
-                self._matrix[row_id - 1] = [None] * self.COLUMN_COUNT # update matrix with an empty row
+                self._matrix[row_id - 1] = [None] * self.COLUMN_COUNT  # update matrix with an empty row
             row_id += 1
 
         mc.refresh()

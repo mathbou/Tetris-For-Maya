@@ -29,7 +29,7 @@ show_source = false
 docstring-convention = "google"
 allow-untyped-defs = true
 max-complexity = 10
-exclude = ["V1", "V2"]
+exclude = ["V1", "V2", ".venv"]
 
 [tool.flakeheaven.plugins]
 mccabe                   = ["+*"]
