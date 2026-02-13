@@ -293,6 +293,7 @@ class Game(QWidget):
     @classmethod
     def start(cls):
         self = cls()
+        self.prepare_viewport()
         self.showMinimized()
         self.parent().installEventFilter(self) # install keyboardCatcher
 
