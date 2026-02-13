@@ -1,8 +1,10 @@
 from .game import Game
+from .time2 import timer_precision
 
 
 def launch_game():
-    Game.start()
+    with timer_precision():
+        Game.start()
 
 
 # TODO bug de rotation quand collé a gauche
