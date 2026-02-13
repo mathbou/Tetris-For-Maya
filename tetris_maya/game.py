@@ -6,8 +6,9 @@ import maya.cmds as mc
 from PySide2.QtCore import QObject, Signal, QEvent, Slot, QThread, Qt
 from PySide2.QtWidgets import QWidget
 
+from .time2 import timer_precision
 from .constants import PREFIX, TIME_STEP, SCORE_TABLE
-from .grid import Grid
+from .grid import Grid, Hold
 from .maya2 import hud_countdown, get_main_window
 from .tetrimino import TetriminoType
 
@@ -26,29 +27,48 @@ class Action(IntEnum):
 class LoopWorker(QObject):
     step = Signal()
     finished = Signal()
+    canceled = Signal()
 
-    def __init__(self, row_count, time_step):
+    def __init__(self, row_count: int, time_step: float, max_frequency: int = 60):
         self.__loop_count = row_count
         self.__time_step = time_step
+        self.__max_frequency = max_frequency
         super().__init__()
 
-    def run(self):
-        self._isRunning = True
-        start = time.perf_counter()
+        self.finished.connect(self.deleteLater)
+        self.canceled.connect(self.deleteLater)
 
-        for _ in range(self.__loop_count):
-            if not self._isRunning:
-                break
-            else:
-                time.sleep(self.__time_step)
+    def run(self):
+        self._is_stopped = False
+        self._is_canceled = False
+
+        f_step = self.__time_step / self.__max_frequency
+
+        with timer_precision():
+            for _ in range(self.__loop_count):
+                duration = 0
+
+                while duration < self.__time_step:
+                    start = time.perf_counter()
+                    if self._is_stopped:
+                        self.finished.emit()
+                        return
+                    elif self._is_canceled:
+                        self.canceled.emit()
+                        return
+                    else:
+                        time.sleep(f_step)
+                    duration += time.perf_counter() - start
+
                 self.step.emit()
 
-        print(time.perf_counter()-start)
         self.finished.emit()
 
     def stop(self):
-        self._isRunning = False
+        self._is_stopped = True
 
+    def cancel(self):
+        self._is_canceled = True
 
 class Game(QWidget):
     def __init__(self):
@@ -178,18 +198,23 @@ class Game(QWidget):
             x, y = 0, -1
             self._score += 1
 
+        elif value == Action.ROTATE:
+            self.grid.rotate(self.grid.active_tetrimino)
+
         elif value == Action.HARDD:
             while self.grid.move(self.grid.active_tetrimino, 0, -1):
                 pass
             self._score += 20
-            self.loop_worker.stop()
+            self.stop_loop_worker()
 
         elif value == Action.HOLD:
-            self.grid.hold()
-        elif value == Action.ROTATE:
-            self.grid.rotate(self.grid.active_tetrimino)
+            hold_code = self.grid.hold()
+            if hold_code in [Hold.SWAP, Hold.PUSH]:
+                self.cancel_loop_worker()
+                self.post_hold(hold_code)
 
-        self.grid.move(self.grid.active_tetrimino, x, y)
+        if x or y:
+            self.grid.move(self.grid.active_tetrimino, x, y)
 
     def update_tetrimino_queue(self):
         new_queue = TetriminoType.get_all().copy()
@@ -209,7 +234,7 @@ class Game(QWidget):
         self._time_step = TIME_STEP * (multiplier ** level)
 
     def remove_empty_groups(self):
-        groups = mc.ls(f"{PREFIX}_*grp")
+        groups = mc.ls(f"{PREFIX}_*grp", exactType="transform")
         for grp in groups:
             if not mc.listRelatives(grp, children=True):
                 mc.delete(grp)
@@ -247,8 +272,34 @@ class Game(QWidget):
 
     # ---------------------- Game Loop ----------------------
 
+    def launch_loop_worker(self):
+        self.loop_worker = LoopWorker(self.grid.ROW_COUNT, self.time_step)
+        self.loop_worker.step.connect(self.step)
+        self.loop_worker.moveToThread(self._thread)
+
+        self._thread.started.connect(self.loop_worker.run)
+
+        self.loop_worker.finished.connect(self._thread.quit)
+        self.loop_worker.finished.connect(self.post_loop)
+
+        self._thread.start()
+
+    def stop_loop_worker(self):
+        self.loop_worker.stop()
+        self.stop_thread()
+
+    def cancel_loop_worker(self):
+        self.loop_worker.cancel()
+        self.stop_thread()
+
+    def stop_thread(self):
+        self._thread.quit()
+        with timer_precision():
+            while not self._thread.isFinished():
+                time.sleep(0.02)
+
     def init_loop(self):
-        if self._loop_counter % len(TetriminoType.get_all()) == 0:
+        if len(self.tetrimino_type_queue) < len(TetriminoType.get_all()):
             self.update_tetrimino_queue()
 
         tetrimino_type = self.tetrimino_type_queue.pop(0)
@@ -262,21 +313,12 @@ class Game(QWidget):
         elif self.grid.inplace_collision(self.grid.active_tetrimino):
             self.game_over()
         else:
-            self.loop_worker = LoopWorker(self.grid.ROW_COUNT, self.time_step)
-            self.loop_worker.step.connect(self.step)
-            self.loop_worker.moveToThread(self._thread)
-            self._thread.started.connect(self.loop_worker.run)
-
-            self.loop_worker.finished.connect(self.post_loop)
-            self.loop_worker.finished.connect(self.loop_worker.deleteLater)
-            self.loop_worker.finished.connect(self._thread.quit)
-
-            self._thread.start()
+            self.launch_loop_worker()
 
     @Slot()
     def step(self):
         if not self.grid.move(self.grid.active_tetrimino, 0, -1):
-            self.loop_worker.stop()
+            self.stop_loop_worker()
 
     @Slot()
     def post_loop(self):
@@ -291,6 +333,12 @@ class Game(QWidget):
         self.remove_empty_groups()
 
         self.init_loop()
+
+    def post_hold(self, value: Hold):
+        if value is Hold.SWAP:
+            self.launch_loop_worker()
+        elif value is Hold.PUSH:
+            self.init_loop()
 
     @classmethod
     def start(cls):
