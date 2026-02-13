@@ -79,7 +79,7 @@ def tetrimino_maker(cubes: Tuple[Tuple[float, float], Tuple[float, float], Tuple
         mc.move(tx, ty, 0, tetrimino_cube, absolute=True)
         tetrimino_cubes.append(tetrimino_cube)
 
-    group = mc.group(tetrimino_cubes, name=f"{PREFIX}_tetrimino{name}")
+    group = mc.group(tetrimino_cubes, name=f"{PREFIX}_tetrimino{name}_grp")
     mc.xform(group, pivots=(0, 0, 0), worldSpace=True)
 
     cubes = tuple(f'{group}|{cube}' for cube in tetrimino_cubes) # way faster than listRelatives
