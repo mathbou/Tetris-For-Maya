@@ -131,10 +131,7 @@ class Game(QWidget):
         )
 
     def prepare_viewport(self):
-        Grid.make()
-
-        # --------- Camera ---------
-        camera = mc.camera(focalLength=300, nearClipPlane=10,
+        camera, _ = mc.camera(focalLength=300, nearClipPlane=10,
                            name=f"{PREFIX}_cam")
         mc.lookThru(camera)
         mc.viewFit(camera)
