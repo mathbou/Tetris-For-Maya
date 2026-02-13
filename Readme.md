@@ -6,6 +6,8 @@
 
 **{- Requires Maya 2022+ -}**
 
+Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/master/TetrisMaya-master.zip) 
+
 Copy the `tetris_maya` folder into your maya script folder  
 - Win: `%USERPROFILE%\maya\<MAYA_VERSION>\prefs\scripts`
 - Lnx: `~/maya/<MAYA_VERSION>/prefs/scripts`
@@ -16,6 +18,17 @@ As the project is build as a package, you also can install it using `mayapy` and
 
 - Win: `mayapy.exe -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target %USERPROFILE%\Documents/maya\<MAYA_VERSION>\prefs\scripts`
 - Lnx: `mayapy -m pip install tetris-maya --extra-index-url https://gitlab.com/api/v4/projects/5153531/packages/pypi/simple --target ~/maya/<MAYA_VERSION>/prefs/scripts`
+
+#### 👴 Backport
+
+A special version for Maya 2017-2020 is available in the [backport-27](https://gitlab.com/mathbou/TetrisMaya/-/tree/backport_27) branch.
+
+Download the source code from [here](https://gitlab.com/mathbou/TetrisMaya/-/archive/backport_27/TetrisMaya-backport_27.zip). 
+Then follow the exact same [instructions](#installation) as the standard version.
+
+If you want to use the [alternative installation](#alternative-installation), replace the package name `tetris-maya` by `tetris-maya-backport`.
+
+{- This backport was partially made using automatic converters, so it may be unstable or crash. -}
 
 ## 📚 Add shelf
 
