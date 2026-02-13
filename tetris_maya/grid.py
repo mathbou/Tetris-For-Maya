@@ -240,9 +240,9 @@ class Grid:
         mc.refresh()
 
     def _move_to_hold(self, tetrimino: Tetrimino):
-        local_center = [c - p for c, p in zip(mc.objectCenter(tetrimino.root), tetrimino.position)]
+        local_center = [c - p for c, p in zip(mc.objectCenter(tetrimino.root), tetrimino.position)]  # only return x, y
         translation = [h - c for h, c in zip(self.HOLD_POS, local_center)]
-        mc.move(*translation, tetrimino.root, absolute=True)
+        mc.move(*translation, 0, tetrimino.root, absolute=True)
         mc.scale(0.85, 0.85, 0.85, tetrimino.root, absolute=True)
 
     def reset_hold(self):
