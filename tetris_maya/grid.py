@@ -1,4 +1,5 @@
 import math
+from enum import IntEnum
 from typing import TYPE_CHECKING, ClassVar, Optional, Tuple, List
 
 import maya.cmds as mc
@@ -11,7 +12,13 @@ if TYPE_CHECKING:
     from .tetrimino import Tetrimino
 
 
-__all__ = ["Grid"]
+__all__ = ["Grid", "Hold"]
+
+
+class Hold(IntEnum):
+    CANT = 0
+    PUSH = 1
+    SWAP = 2
 
 
 class Grid():
@@ -185,18 +192,24 @@ class Grid():
     def reset_hold(self):
         self._can_hold = True
 
-    def hold(self):
+    def hold(self) -> Hold:
         if self._can_hold:
+            exit_code = Hold.PUSH
             backup = self.active_tetrimino
 
             if self._hold_tetrimino:
                 self.active_tetrimino = self._hold_tetrimino
                 self._move_to_start(self.active_tetrimino)
+                exit_code = Hold.SWAP
 
             self._hold_tetrimino = backup
             self._can_hold = False
             self._move_to_hold(self._hold_tetrimino)
             mc.refresh()
+
+            return exit_code
+        else:
+            return Hold.CANT
 
     def update_cells(self, tetrimino: "Tetrimino"):
         for cube, (x, y) in zip(tetrimino.cubes, tetrimino.cube_positions):
