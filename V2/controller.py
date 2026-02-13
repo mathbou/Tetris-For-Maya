@@ -1,7 +1,7 @@
-import  tetris
-reload(tetris)
-from tetris import Tetris
 import os
+
+from tetris import Tetris
+
 
 class Controller(object):
     def __init__(self, ui, name, parent=None):

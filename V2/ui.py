@@ -1,6 +1,7 @@
-from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import *
+
 
 class Ui(QWidget):
     def __init__(self, controller, name, parent=None):
@@ -12,7 +13,7 @@ class Ui(QWidget):
         icon = QIcon(self.controller.get_icon())
         self.setWindowIcon(icon)
         self.setMinimumWidth(150)
-        self.move(75,175)
+        self.move(75, 175)
         self.setWindowFlags(Qt.Window)
         self.action = 0
 
@@ -40,14 +41,14 @@ class Ui(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Up:
-            print "up"
+            print("up")
             self.action = 1
         elif event.key() == Qt.Key_Down:
-            print "down"
+            print("down")
             self.action = 2
         elif event.key() == Qt.Key_Left:
-            print "left"
+            print("left")
             self.action = 3
         elif event.key() == Qt.Key_Right:
-            print "right"
+            print("right")
             self.action = 4

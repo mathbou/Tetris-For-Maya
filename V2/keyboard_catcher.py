@@ -1,7 +1,9 @@
 import socket
 from threading import Thread
+
 from pynput import keyboard
-from tetrisGlobals import *
+from constants import *
+
 
 class KeyLogger(Thread):
     def __init__(self):
@@ -31,14 +33,14 @@ class KeyLogger(Thread):
                 self.action = HARDD
 
     def on_release(self, key):
-        print('{0} released'.format(key))
+        print("{0} released".format(key))
 
         if key == keyboard.Key.end:
             # Stop listener
             return False
 
     def close(self):
-        print "Stopping keyboard catcher"
+        print("Stopping keyboard catcher")
         self.human_press(keyboard.Key.end)
 
     @staticmethod
@@ -48,7 +50,7 @@ class KeyLogger(Thread):
 
     def run(self):
         # Collect events until released
-        print "keyboard catcher running"
+        print("keyboard catcher running")
 
         with keyboard.Listener(on_press=self.on_press, on_release=self.on_release) as listener:
             listener.join()
@@ -59,12 +61,12 @@ def socket_error(func):
         try:
             return func(*args)
         except socket.error:
-            print "socket error"
+            print("socket error")
+
     return wrapper
 
 
 class Server(object):
-
     def __init__(self, keylogger, host="localhost", port=42198):
         self.host = host
         self.port = port
@@ -74,14 +76,14 @@ class Server(object):
 
     def run(self):
         # start server
-        print "Start server {0}:{1}".format(self.host, self.port)
+        print("Start server {0}:{1}".format(self.host, self.port))
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
 
         self._listening()
 
     def _listening(self):
-        print "Start listening"
+        print("Start listening")
 
         while True:
             self.server.listen(5)
@@ -99,17 +101,17 @@ class Server(object):
     @socket_error
     def accept_connection(self):
         self.client, address = self.server.accept()
-        print self.client, address
+        print(self.client, address)
 
     def kill_server(self):
         self.keylogger.close()
 
-        print "Stopping Server"
+        print("Stopping Server")
         self.client.close()
         self.server.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     GET = "get"
     KILL = "kill"
 
