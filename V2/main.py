@@ -9,7 +9,7 @@
 #
 # Copyright (c) 2018 Mathieu Bouzard.
 #
-# This file is part of Tetris Maya 
+# This file is part of Tetris For Maya
 # (see https://gitlab.com/mathbou/TetrisMaya).
 #
 # This program is free software: you can redistribute it and/or modify
