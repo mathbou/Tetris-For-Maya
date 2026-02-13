@@ -158,8 +158,8 @@ class Grid():
 
         return True
 
-    def move_to_start(self, tetrimino: "Tetrimino"):
-        mc.move(0, self.TOP, 0, tetrimino.root, absolute=True)
+    def _move_to_start(self, tetrimino: "Tetrimino"):
+        mc.move(self.COLUMN_COUNT/2 - 1, self.TOP, 0, tetrimino.root, absolute=True)
         mc.scale(1, 1, 1, tetrimino.root, absolute=True)
 
     def _move_to_next(self, tetrimino: "Tetrimino"):
@@ -170,7 +170,7 @@ class Grid():
     def put_to_next(self, tetrimino: "Tetrimino"):
         if self._next_tetrimino:
             self.active_tetrimino = self._next_tetrimino
-            self.move_to_start(self.active_tetrimino)
+            self._move_to_start(self.active_tetrimino)
 
         self._next_tetrimino = tetrimino
         self._move_to_next(self._next_tetrimino)
@@ -190,7 +190,7 @@ class Grid():
 
             if self._hold_tetrimino:
                 self.active_tetrimino = self._hold_tetrimino
-                self.move_to_start(self.active_tetrimino)
+                self._move_to_start(self.active_tetrimino)
 
             self._hold_tetrimino = backup
             self._can_hold = False
