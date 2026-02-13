@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
+from PySide2.QtGui import QIcon
 
 class Ui(QWidget):
     def __init__(self, controller, name, parent=None):
@@ -7,6 +8,9 @@ class Ui(QWidget):
         self.controller = controller
         #  create window
         self.setWindowTitle(name)
+
+        icon = QIcon(self.controller.get_icon())
+        self.setWindowIcon(icon)
         self.setMinimumWidth(150)
         self.move(75,175)
         self.setWindowFlags(Qt.Window)

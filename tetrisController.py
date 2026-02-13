@@ -1,6 +1,7 @@
 import  tetris
 reload(tetris)
 from tetris import Tetris
+import os
 
 class Controller(object):
     def __init__(self, ui, name, parent=None):
@@ -13,3 +14,6 @@ class Controller(object):
         tetris = Tetris()
         tetris.launch_game_process()
 
+    def get_icon(self):
+        icon_path = "{0}/ressources/logo.ico".format(os.path.dirname(os.path.abspath(__file__)))
+        return icon_path
