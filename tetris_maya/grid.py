@@ -294,7 +294,7 @@ class Grid:
 
         return completed_rows
 
-    def _move_down_rows(self, from_row: int):
+    def _move_down_rows(self, from_row: int) -> bool:
         """Move down rows and update grid data.
 
         Warnings:
